@@ -522,6 +522,52 @@ backend-issued token and correctly fetched the user, stored the session,
 and landed on the dashboard — the exact round trip a real Google redirect
 produces. 267/267 backend tests pass.
 
+**Phase 19 complete**: regression suite (`backend/test/regression/`, spec
+§38). Every earlier phase verified exactly **one** chart by hand — Chennai,
+1990-01-15 — which left two real gaps: one chart is not a sample (the
+engine could have been badly wrong for a southern-hemisphere birth, a
+negative UTC offset, a DST-era birth or an extreme latitude and nothing
+would have caught it), and hand-written assertions only cover the fields
+they happen to name (changing the ayanamsa or the navamsa formula would
+sail past them). This phase closes both with **six reference charts** —
+Chennai plus Sydney (southern hemisphere, summer DST), New York (negative
+longitude *and* negative UTC offset, historic EDT), London (minutes past
+midnight), Singapore (~1°N) and Reykjavík (64°N, plus `UNKNOWN` birth-time
+accuracy) — run through two complementary layers. **Invariants**
+(`engine-invariants.spec.ts`, pure and fast): properties that must hold for
+*any* birth data, each re-derived from first principles inside the test
+rather than by calling the same helper the engine uses, since checking `f`
+against `f` proves nothing — sign/nakshatra/pada consistency with raw
+longitude, whole-sign house placement, the Rahu-Ketu axis, determinism, and
+the same-instant/different-place behaviour whose absence caused the real
+Phase 4 bug. **Golden masters** (`chart-regression.e2e-spec.ts`): all six
+charts driven through the real production path (HTTP → jathakam →
+calculation → houses → navamsa → yoga/dosha → dasha → transits → report)
+with dasha and transits pinned to fixed as-of dates so they're
+deterministic, snapshotted across 9,896 lines. **Two of my own expectations
+were wrong and the engine was right**, both caught and investigated rather
+than papered over: I asserted Rahu is always retrograde (true of the *mean*
+node — this engine deliberately uses the *true* node, which really does turn
+direct, as 2 of the 6 charts show), and I put the Chennai Sun on the wrong
+side of Makara Sankranti (which fell on Jan 14 in 1990). A third failure
+was a 1ms float artifact where a Mahadasha's last Antardasha lands a
+millisecond short of its parent — matching the tolerance Phase 9's own
+tests already use for the same accumulation. The suite's value was
+**demonstrated, not assumed**: deliberately introducing an off-by-one into
+the navamsa formula failed all six golden snapshots while *every invariant
+test still passed* (a shifted navamsa still has twelve houses and nine
+grahas), then the engine was restored exactly and verified clean against
+the commit. Honest scoping is documented in
+`backend/test/regression/README.md`: the Chennai snapshots lock in
+hand-verified output (and its Raja Yoga and two doshas are re-asserted
+explicitly so they survive a careless `jest -u`), while the other five lock
+in *current* behaviour for drift detection — that is not a claim a human
+confirmed every number. Also added: `npm run test:regression`, and
+bilingual coverage that walks the entire response asserting every `{ta,en}`
+label is populated in both languages, plus a language-switching check that
+the 34-section report keeps identical structure in Tamil and English.
+424/424 backend tests pass across 37 suites, up from 267.
+
 ## Getting started
 
 ```bash
