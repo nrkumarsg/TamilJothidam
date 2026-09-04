@@ -568,6 +568,48 @@ label is populated in both languages, plus a language-switching check that
 the 34-section report keeps identical structure in Tamil and English.
 424/424 backend tests pass across 37 suites, up from 267.
 
+**Phase 20 complete**: production deployment (`docs/DEPLOYMENT.md`). The
+highest-risk untested thing was addressed first: three of the four Prisma
+migrations were written **by hand** (because `prisma migrate dev` refuses to
+run non-interactively), so if they didn't reproduce `schema.prisma` a fresh
+production deploy would fail and nobody would know until they tried. Applying
+all four to a real throwaway database with `migrate deploy` and then running
+`prisma migrate diff` reports **"No difference detected"** — they're provably
+correct. Then the production-safety gaps: `enableCors()` was allowing **every
+origin**, nothing validated configuration at boot (deploying without
+`JWT_SECRET` would have signed tokens with `undefined`), the health check
+never touched the database so a load balancer would route to an instance that
+couldn't serve, and `enableShutdownHooks()` was missing so container SIGTERM
+dropped Prisma connections instead of closing them. All four are fixed.
+`checkProductionReadiness()` now refuses to boot production when
+`JWT_SECRET` is absent, too short, or **still the placeholder published in
+`.env.example`** — while downgrading the same checks to warnings in
+development so local work keeps running (verified live: the dev server boots
+and warns about exactly the two things that would block a deploy). Liveness
+and readiness are now deliberately separate, and that design was tested
+against a **real outage** rather than a mock — stopping Postgres left
+`/health` at 200 (so an orchestrator won't cycle healthy instances over a
+database blip) while `/health/ready` returned 503 naming the database, and
+readiness recovered on its own when Postgres came back, without restarting
+the API. Also added: multi-stage Dockerfiles for both services — the backend
+one installs Chromium, since `puppeteer-core` ships no browser, and copies
+the runtime-loaded `prompts/` and `assets/fonts/` that aren't compiled into
+`dist/` — a `docker-compose.prod.yml` that runs migrations as a separate
+one-shot job (replicas racing to migrate the same database is a real
+failure mode), Next.js `standalone` output, and a `.dockerignore`. A
+`.gitignore` hole was closed too: `.env.production` was **not** ignored, so
+filling in the new template would have committed real secrets. **Honest
+caveat, documented at the top of `docs/DEPLOYMENT.md`:** Docker can't be
+installed in this development environment (the same WSL2/admin constraint
+behind the portable Postgres), so the Dockerfiles are **not build-verified**
+— every `COPY` source was checked by hand, which caught two real defects (a
+`frontend/public` that doesn't exist, and a `backend/node_modules` copy
+depending on npm hoisting), but expect to iterate on the first
+`docker build`. Known gaps are listed rather than glossed: no TLS
+termination, no rate limiting, no security headers, no token revocation, no
+centralised logging, no backup procedure, no CI. 442/442 backend tests pass
+across 38 suites.
+
 ## Getting started
 
 ```bash

@@ -7,10 +7,14 @@ build/
 .next/
 out/
 
-# Env files (never commit secrets)
+# Env files (never commit secrets).
+# Ignore every .env* variant, then re-admit the committed templates — so a
+# new file like .env.production is excluded by default rather than only if
+# someone remembered to add a rule for it.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.*.example
 
 # Logs
 *.log

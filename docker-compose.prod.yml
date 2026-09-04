@@ -1,0 +1,100 @@
+# Production-shaped deployment (Phase 20). Self-contained: builds both
+# images, runs migrations once as a separate job, then starts the API and
+# web app behind a Postgres that only they can reach.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# Every value below comes from the env file — nothing is hard-coded, and the
+# API refuses to boot if a required secret is missing or still a placeholder
+# (see backend/src/config/production-readiness.ts).
+#
+# For a real deployment, prefer a MANAGED Postgres over the container here:
+# it gives you backups, point-in-time recovery and patching, none of which
+# this service provides. Drop the `postgres` service and point DATABASE_URL
+# at the managed instance.
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - jathakam_pgdata:/var/lib/postgresql/data
+    # Deliberately NOT published to the host — only the API needs it.
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Runs once per release and exits. Keeping migrations out of the API's
+  # own startup avoids several replicas racing to migrate the same database.
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    command: ["npx", "--workspace", "backend", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      API_KEY_ENCRYPTION_SECRET: ${API_KEY_ENCRYPTION_SECRET:?set API_KEY_ENCRYPTION_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS}
+      FRONTEND_URL: ${FRONTEND_URL:?set FRONTEND_URL}
+      DEFAULT_AYANAMSA: ${DEFAULT_AYANAMSA:-LAHIRI}
+      AI_DEFAULT_PROVIDER: ${AI_DEFAULT_PROVIDER:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-5}
+      ASTROLOGY_PROMPT_VERSION: ${ASTROLOGY_PROMPT_VERSION:-1.0}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    volumes:
+      # Generated PDFs are regenerable from the database, but keeping them
+      # across restarts avoids re-rendering every report after a deploy.
+      - jathakam_reports:/app/backend/generated-reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        # Baked into the client bundle at build time — see frontend/Dockerfile.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?set NEXT_PUBLIC_API_URL}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+volumes:
+  jathakam_pgdata:
+  jathakam_reports:

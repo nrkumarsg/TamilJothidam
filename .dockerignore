@@ -1,0 +1,32 @@
+# Keeps secrets and local-only state out of the build context. The .env
+# exclusions matter most: without them a real API key or JWT secret would be
+# copied into an image layer and travel wherever that image goes.
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+
+node_modules
+**/node_modules
+
+# Build output — images build these themselves from source.
+dist
+**/dist
+.next
+**/.next
+
+# Local-only Postgres install and generated artifacts
+.devdb
+backend/generated-reports
+
+.git
+.gitignore
+**/*.log
+coverage
+**/coverage
+.vscode
+.idea
+.claude
+**/*.tsbuildinfo
