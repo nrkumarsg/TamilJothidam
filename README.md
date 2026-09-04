@@ -610,6 +610,38 @@ termination, no rate limiting, no security headers, no token revocation, no
 centralised logging, no backup procedure, no CI. 442/442 backend tests pass
 across 38 suites.
 
+**Phase 21 complete**: daily panchangam (`backend/src/panchangam/`).
+Entirely independent of the birth-chart pipeline — a date and a place
+in, the five classical "angas" (tithi, vaara, nakshatra, yoga, karana) plus
+Rahu Kalam, Yamagandam, Gulika, Durmuhurtham, Abhijit Muhurta and the Gowri
+Panchangam / Nalla Neram out, over a new **unauthenticated** `GET
+/panchangam` endpoint — deliberately public, since a panchangam is a
+property of a date and place, not of anyone's birth data. The one design
+point everything else follows from: the Vedic day runs sunrise-to-sunrise,
+so every value is sampled **at sunrise**, not local midnight — sunrise/
+sunset themselves needed adding to `EphemerisService` first, via Swiss
+Ephemeris `rise_trans`. Rahu Kalam and friends are each one eighth of the
+real sunrise-to-sunset span, not the fixed 90-minute blocks some sources
+quote, so they run longer in summer than in winter — verified against real
+Chennai data rather than assumed: hand-computed elongation confirms
+Amavasai sits at lunar conjunction (~360°) and Pournami at opposition
+(~180°), which is what those phases physically *are*, not just what the
+formula outputs; southern-hemisphere daylight correctly **inverts** (Sydney
+short in June, long in December, opposite of Chennai — the real test that
+latitude sign is handled, since a same-hemisphere check alone can't catch a
+sign error); and the Saturday/Sunday Rahu Kalam and Yamagandam start times
+match the classical Tamil almanac figures within a season-driven tolerance.
+Polar latitudes are handled explicitly rather than crashing or guessing:
+at Longyearbyen (78°N) in June the Sun neither rises nor sets, so the
+response reports `polarDayOrNight: true` with every day-segment window
+nulled, while the five angas still compute (sampled at local apparent noon
+instead). Varjyam is the one anga **deliberately left uncomputed** — its
+published per-nakshatra fraction tables disagree between almanac
+traditions, and a wrong number would look more authoritative than an
+honest gap — it's listed in the response's `notComputed` array with the
+reason, a pattern that also covers the polar case. 469/469 backend tests
+pass across 40 suites, up from 442/38 (27 new: 22 unit + 5 e2e).
+
 ## Getting started
 
 ```bash

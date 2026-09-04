@@ -92,6 +92,54 @@ export class EphemerisService {
     return result.data.points[0];
   }
 
+  // Sunrise/sunset as Julian Days (UT), for the first such event at or
+  // after `fromJulianDayUt`. Phase 21 (Panchangam) needs these because the
+  // Vedic day runs sunrise-to-sunrise, not midnight-to-midnight, and every
+  // day-segment calculation (Rahu Kalam and friends) divides the interval
+  // between them.
+  //
+  // Returns null above the Arctic/Antarctic circles on days when the Sun
+  // never rises or never sets — a real condition, not an error, and one the
+  // caller has to handle rather than pretend a time exists.
+  sunriseSunset(
+    fromJulianDayUt: number,
+    latitude: number,
+    longitude: number,
+  ): { sunriseJd: number | null; sunsetJd: number | null } {
+    return {
+      sunriseJd: this.riseTransit(fromJulianDayUt, latitude, longitude, sweph.constants.SE_CALC_RISE),
+      sunsetJd: this.riseTransit(fromJulianDayUt, latitude, longitude, sweph.constants.SE_CALC_SET),
+    };
+  }
+
+  private riseTransit(
+    fromJulianDayUt: number,
+    latitude: number,
+    longitude: number,
+    event: number,
+  ): number | null {
+    const result = sweph.rise_trans(
+      fromJulianDayUt,
+      sweph.constants.SE_SUN,
+      '',
+      sweph.constants.SEFLG_MOSEPH,
+      event,
+      // sweph takes geographic position as [longitude, latitude, altitude]
+      // — longitude first, which is the opposite order to how latitude and
+      // longitude are written everywhere else in this codebase.
+      [longitude, latitude, 0],
+      0,
+      0,
+    );
+    // flag -2 means "event does not occur" (polar day/night). Any other
+    // error is a genuine failure worth surfacing.
+    if (result.flag === -2) return null;
+    if (result.error) {
+      throw new InternalServerErrorException(`Sunrise/sunset calculation failed: ${result.error}`);
+    }
+    return result.data as unknown as number;
+  }
+
   private rawSiderealLongitude(planetId: number, julianDayUt: number): LongitudeResult {
     const result = sweph.calc_ut(julianDayUt, planetId, CALC_FLAGS);
     if (result.error) {

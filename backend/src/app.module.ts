@@ -13,6 +13,7 @@ import { ReportModule } from './reports/report.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { LoggingModule } from './logging/logging.module';
+import { PanchangamModule } from './panchangam/panchangam.module';
 
 // Feature modules are added here phase by phase (see docs/ARCHITECTURE.md).
 // Phase 1: health check. Phase 2: Prisma/DB layer. Phase 3: birth data
@@ -22,7 +23,8 @@ import { LoggingModule } from './logging/logging.module';
 // interpretation engine. Phase 14: Tamil/English glossary + report section
 // headings. Phase 15: full report generator (assembles all 34 sections).
 // Phase 16: PDF generation. Phase 17: authentication + user profiles.
-// Phase 18: admin panel.
+// Phase 18: admin panel. Phase 21: daily panchangam (date+place, no birth
+// profile — kept last since it's independent of the chart pipeline).
 @Module({
   imports: [
     PrismaModule,
@@ -39,6 +41,7 @@ import { LoggingModule } from './logging/logging.module';
     AiModule,
     I18nModule,
     ReportModule,
+    PanchangamModule,
   ],
 })
 export class AppModule {}
