@@ -1,0 +1,20 @@
+version: "3.9"
+
+# Local development infrastructure only. Production deployment (Phase 20)
+# will use managed Postgres; this compose file is for local dev/testing.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: jathakam_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-jathakam}
+      POSTGRES_USER: ${POSTGRES_USER:-jathakam}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jathakam_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - jathakam_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  jathakam_postgres_data:

@@ -1,0 +1,1587 @@
+# MASTER PROMPT — TAMIL VEDIC ASTROLOGY / JATHAKAM AI SOFTWARE
+
+You are a senior software architect, Vedic astrology software engineer, Tamil language expert, astronomical calculation engineer, database architect, UI/UX designer, and AI/RAG engineer.
+
+I want you to build a production-quality **Tamil Vedic Astrology / Jathakam AI application**.
+
+The application must generate a complete Jathakam from:
+
+1. Date of Birth
+2. Exact Time of Birth
+3. Place of Birth
+4. Gender
+5. Preferred output language
+
+The primary output language must be **Tamil**.
+
+The application should support English as an optional language, but Tamil must be the default and the entire Tamil output must be natural, readable, grammatically correct Tamil.
+
+Do NOT build this as a simple AI chatbot.
+
+The system must have:
+
+**ASTRONOMICAL CALCULATION ENGINE → JATHAKAM ENGINE → DASHA ENGINE → ASTROLOGICAL RULE ENGINE → AI INTERPRETATION ENGINE → REPORT GENERATOR**
+
+The AI must NEVER invent planetary positions, houses, nakshatras, dashas, or astronomical calculations.
+
+---
+
+# 1. APPLICATION OBJECTIVE
+
+Build an application that accepts a person's birth details and produces:
+
+* ராசி கட்டம்
+* நவாம்ச கட்டம்
+* லக்னம்
+* ராசி
+* நட்சத்திரம்
+* பாதம்
+* கிரக நிலைகள்
+* பாவ நிலைகள்
+* பாவாதிபதிகள்
+* கிரக பலம்
+* பார்வைகள்
+* சேர்க்கைகள்
+* யோகங்கள்
+* தோஷங்கள்
+* விம்சோத்தரி தசா
+* புத்தி / அந்தரம்
+* கோச்சாரம்
+* வயது அடிப்படையிலான பலன்கள்
+* கடந்த கால வாழ்க்கை நிகழ்வுகளுக்கான ஜோதிட விளக்கம்
+* தற்போதைய வாழ்க்கை நிலை
+* எதிர்கால பலன்கள்
+* உடல்நலம்
+* செல்வம்
+* தொழில்
+* வியாபாரம்
+* வேலை
+* திருமணம்
+* குடும்பம்
+* குழந்தைகள்
+* கல்வி
+* வெளிநாட்டு வாய்ப்பு
+* சொத்து
+* வாகனம்
+* கடன்
+* முதலீடு
+* ஆன்மிகம்
+* சமூக வாழ்க்கை
+* அதிர்ஷ்ட காலங்கள்
+* சவாலான காலங்கள்
+* நல்ல நாட்கள் / காலங்கள்
+* சாதகமான நிறங்கள்
+* சாதகமான எண்கள்
+* சாதகமான நாட்கள்
+* பரிகாரங்கள்
+* முக்கியமான வாழ்க்கை காலங்கள்
+
+---
+
+# 2. INPUT SCREEN
+
+Create a professional input screen.
+
+Fields:
+
+### Personal Information
+
+Name
+Date of Birth
+Exact Time of Birth
+Birth Place
+Gender
+Country
+Timezone
+
+The user should be able to search for a city/place.
+
+The application must automatically determine:
+
+* Latitude
+* Longitude
+* Timezone
+* DST information where applicable
+
+Allow manual correction of latitude/longitude/timezone.
+
+IMPORTANT:
+
+Birth time accuracy must be displayed.
+
+Provide an option:
+
+"பிறந்த நேரம் எவ்வளவு துல்லியமானது?"
+
+Options:
+
+* மிகவும் துல்லியம்
+* சுமார் 5 நிமிடங்கள்
+* சுமார் 15 நிமிடங்கள்
+* சுமார் 30 நிமிடங்கள்
+* தெரியவில்லை
+
+This information should be used when explaining prediction confidence.
+
+---
+
+# 3. ASTROLOGICAL CALCULATION SYSTEM
+
+Implement deterministic calculations.
+
+Use a reliable astronomical/astrological calculation library.
+
+Prefer:
+
+Swiss Ephemeris
+
+or another established astronomical ephemeris library.
+
+DO NOT ask an LLM to calculate planetary positions.
+
+All planetary calculations must be generated programmatically.
+
+Support:
+
+* Sun
+* Moon
+* Mars
+* Mercury
+* Jupiter
+* Venus
+* Saturn
+* Rahu
+* Ketu
+* Lagna
+
+Calculate:
+
+* Longitude
+* Latitude where required
+* Sign
+* Degree
+* Nakshatra
+* Pada
+* House
+* Retrograde status
+* Combustion
+* Exaltation
+* Debilitation
+* Own sign
+* Friendly sign
+* Enemy sign
+* Planetary strength
+
+Use a clearly defined ayanamsa.
+
+Default:
+
+Lahiri Ayanamsa
+
+Store the selected ayanamsa in the database.
+
+Never silently change the ayanamsa.
+
+---
+
+# 4. SOUTH INDIAN STYLE JATHAKAM
+
+The main chart must use the traditional South Indian style.
+
+Display:
+
+ராசி கட்டம்
+
+Use Tamil labels.
+
+Include:
+
+மேஷம்
+ரிஷபம்
+மிதுனம்
+கடகம்
+சிம்மம்
+கன்னி
+துலாம்
+விருச்சிகம்
+தனுசு
+மகரம்
+கும்பம்
+மீனம்
+
+Display planets inside the appropriate houses/signs.
+
+Also generate:
+
+நவாம்சம் (D9)
+
+Future architecture should support:
+
+D1
+D2
+D3
+D4
+D7
+D9
+D10
+D12
+D16
+D20
+D24
+D27
+D30
+D40
+D45
+D60
+
+Do not enable every divisional chart in the first UI version, but architect the system so they can be added later.
+
+---
+
+# 5. BASIC JATHAKAM DATA
+
+Generate a structured astrology JSON object.
+
+Example:
+
+{
+"birth_details": {},
+"lagna": {},
+"rasi": {},
+"nakshatra": {},
+"planets": {},
+"houses": {},
+"aspects": {},
+"yogas": {},
+"doshas": {},
+"dasha": {},
+"navamsa": {},
+"transits": {}
+}
+
+This JSON is the source of truth for the AI.
+
+The AI must not modify the calculated data.
+
+---
+
+# 6. PLANETARY ANALYSIS
+
+For every planet calculate and explain:
+
+* எந்த ராசியில் உள்ளது?
+* எந்த பாவத்தில் உள்ளது?
+* எந்த நட்சத்திரத்தில் உள்ளது?
+* எந்த பாதத்தில் உள்ளது?
+* எந்த பாவங்களுக்கு அதிபதி?
+* எந்த பாவங்களை பார்வை செய்கிறது?
+* எந்த கிரகங்களுடன் சேர்ந்துள்ளது?
+* எந்த கிரகங்களால் பாதிக்கப்படுகிறது?
+* உச்சம் / நீசம்?
+* சொந்த வீடு?
+* நட்பு / பகை?
+* வக்கிரம்?
+* அஸ்தமனம்?
+* கிரக பலம்?
+
+Then generate an interpretation.
+
+---
+
+# 7. HOUSE ANALYSIS
+
+Analyze all 12 houses.
+
+For every house explain:
+
+1. அந்த பாவம் எதை குறிக்கிறது?
+2. அந்த பாவத்தின் அதிபதி யார்?
+3. அதிபதி எங்கு இருக்கிறார்?
+4. அந்த பாவத்தில் உள்ள கிரகங்கள்
+5. அந்த பாவத்திற்கு கிடைக்கும் பார்வைகள்
+6. சுப / அசுப தாக்கங்கள்
+7. அந்த பாவத்தின் பலம்
+8. வாழ்க்கையில் அதன் தாக்கம்
+
+The AI should explain this in natural Tamil.
+
+---
+
+# 8. DASHA SYSTEM
+
+Implement Vimshottari Dasha accurately.
+
+Calculate:
+
+* Mahadasha
+* Antardasha
+* Pratyantardasha where practical
+
+Calculate exact start and end dates.
+
+Show:
+
+கடந்த தசை
+தற்போதைய தசை
+அடுத்த தசை
+
+For every major period explain:
+
+* Career
+* Money
+* Health
+* Family
+* Marriage
+* Children
+* Business
+* Travel
+* Property
+* Education
+* Spirituality
+
+Never invent Dasha dates.
+
+---
+
+# 9. TRANSIT / GOCHARA ENGINE
+
+Implement planetary transit calculations.
+
+At minimum analyze:
+
+* Saturn
+* Jupiter
+* Rahu
+* Ketu
+* Mars
+
+Compare transits against:
+
+* Natal Moon
+* Natal Lagna
+* Natal planets
+* Relevant houses
+
+Include:
+
+* Sade Sati
+* Ashtama Shani
+* Janma Shani where applicable
+* Jupiter transit
+* Rahu/Ketu transit
+
+Clearly distinguish:
+
+"Natal chart prediction"
+
+from
+
+"Transit prediction"
+
+---
+
+# 10. PAST LIFE / KARMA MODULE
+
+Create a dedicated Karma / Past-Life interpretation section.
+
+IMPORTANT:
+
+Do NOT present past-life claims as scientifically proven facts.
+
+Use wording such as:
+
+"ஜோதிட பாரம்பரியத்தின் அடிப்படையில்..."
+
+"இந்த ஜாதக அமைப்பு கர்ம தொடர்பைக் குறிக்கலாம்..."
+
+Analyze:
+
+* Ketu
+* Rahu
+* 5th house
+* 8th house
+* 9th house
+* 12th house
+* Atmakaraka if implemented
+* Navamsa
+* relevant planetary combinations
+
+Generate a symbolic karmic interpretation.
+
+Avoid claiming unverifiable historical identities or exact previous-life events as facts.
+
+---
+
+# 11. LIFE PREDICTION MODULE
+
+Generate predictions across different age ranges.
+
+For example:
+
+0–12
+13–18
+19–25
+26–30
+31–35
+36–40
+41–45
+46–50
+51–55
+56–60
+61–65
+66+
+
+Adapt these ranges based on the person's actual age.
+
+For each period provide:
+
+* முக்கிய நிகழ்வுகள்
+* வாய்ப்புகள்
+* சவால்கள்
+* பணநிலை
+* தொழில்
+* குடும்பம்
+* உடல்நலம்
+* உறவுகள்
+* ஆன்மிகம்
+
+Avoid unnecessarily exact claims when the chart does not justify them.
+
+---
+
+# 12. HEALTH MODULE
+
+Create a dedicated:
+
+"உடல்நலம்"
+
+section.
+
+Analyze astrologically:
+
+* 1st house
+* 6th house
+* 8th house
+* 12th house
+* Sun
+* Moon
+* Mars
+* Saturn
+* relevant combinations
+
+Provide:
+
+* பொதுவான உடல்நல போக்கு
+* கவனிக்க வேண்டிய காலங்கள்
+* வாழ்க்கை முறை சார்ந்த பொதுவான பரிந்துரைகள்
+
+IMPORTANT:
+
+Do not diagnose diseases.
+
+Do not tell the user to stop medication.
+
+Do not replace doctors.
+
+Use wording:
+
+"இது ஜோதிட அடிப்படையிலான பொதுவான பார்வை மட்டுமே. மருத்துவ முடிவுகளுக்கு மருத்துவரை அணுகவும்."
+
+---
+
+# 13. WEALTH MODULE
+
+Create:
+
+"செல்வம் மற்றும் பணநிலை"
+
+Analyze:
+
+* 2nd house
+* 5th house
+* 9th house
+* 11th house
+* 2nd lord
+* 5th lord
+* 9th lord
+* 11th lord
+* Jupiter
+* Venus
+* relevant Dasha periods
+
+Generate:
+
+* பணவரவு திறன்
+* சேமிப்பு
+* தொழில் மூலம் வருமானம்
+* முதலீட்டு மனப்பான்மை
+* சொத்து வாய்ப்பு
+* கடன் நிலை
+* பண நெருக்கடி காலங்கள்
+* நல்ல பணவரவு காலங்கள்
+
+Do not provide guaranteed financial returns.
+
+---
+
+# 14. CAREER MODULE
+
+Analyze:
+
+* 10th house
+* 10th lord
+* 6th house
+* 2nd house
+* 11th house
+* Saturn
+* Sun
+* Mercury
+* Jupiter
+
+Predict suitable career tendencies.
+
+Examples:
+
+Technology
+Engineering
+Business
+Finance
+Government
+Management
+Sales
+Marketing
+Medicine
+Education
+Marine
+Manufacturing
+IT
+AI
+Research
+Consulting
+etc.
+
+Do not randomly assign a profession.
+
+Explain WHY the chart indicates a particular tendency.
+
+---
+
+# 15. BUSINESS MODULE
+
+If the user selects:
+
+"தொழிலதிபர் / வியாபாரம்"
+
+provide separate analysis.
+
+Analyze:
+
+* 7th house
+* 10th house
+* 11th house
+* 2nd house
+* Mercury
+* Venus
+* Jupiter
+* Saturn
+
+Generate:
+
+* Business strength
+* Partnership tendency
+* Customer relationships
+* Expansion periods
+* Risk periods
+* Financial discipline
+* Foreign business potential
+
+---
+
+# 16. MARRIAGE MODULE
+
+Analyze:
+
+* 7th house
+* 7th lord
+* Venus
+* Jupiter
+* Navamsa
+* relevant Dasha
+
+Provide:
+
+* Marriage tendency
+* Relationship nature
+* Possible challenges
+* Supportive periods
+* Family compatibility themes
+
+Do not claim an exact marriage date unless the astrology rules provide a defensible timing window.
+
+---
+
+# 17. CHILDREN MODULE
+
+Analyze:
+
+* 5th house
+* 5th lord
+* Jupiter
+* relevant divisional charts if implemented
+
+Provide a careful interpretation.
+
+Do not make absolute fertility or medical claims.
+
+---
+
+# 18. EDUCATION MODULE
+
+Analyze:
+
+* 2nd
+* 4th
+* 5th
+* 9th houses
+* Mercury
+* Jupiter
+
+Provide:
+
+* learning style
+* academic strengths
+* higher education tendency
+* technical/creative tendency
+* concentration themes
+
+---
+
+# 19. FOREIGN TRAVEL / SETTLEMENT
+
+Analyze:
+
+* 3rd
+* 7th
+* 9th
+* 12th houses
+* Rahu
+* relevant Dasha
+
+Provide:
+
+* foreign travel tendency
+* overseas work
+* overseas business
+* possible long-term settlement tendency
+
+Do not guarantee migration.
+
+---
+
+# 20. PROPERTY / VEHICLE
+
+Analyze:
+
+* 4th house
+* 4th lord
+* Mars
+* Venus
+* Moon
+* relevant Dasha
+
+Generate property and vehicle-related timing windows.
+
+---
+
+# 21. YOGA ENGINE
+
+Create a rule-based Yoga detection system.
+
+Architecture:
+
+YogaRule
+→ conditions
+→ validation
+→ strength
+→ explanation
+
+Examples to support:
+
+* Raja Yoga
+* Dhana Yoga
+* Gaja Kesari Yoga
+* Budha Aditya Yoga
+* Neecha Bhanga Raja Yoga
+* Dharma Karma Adhipati Yoga
+* Vipareeta Raja Yoga
+* Chandra Mangala Yoga
+
+Do not simply search text and declare a yoga.
+
+Each yoga must have explicit computational conditions.
+
+Store:
+
+name
+conditions
+strength
+participating planets
+participating houses
+interpretation
+
+---
+
+# 22. DOSHA ENGINE
+
+Implement configurable rules for commonly used doshas.
+
+Examples:
+
+* Sevvai Dosham / Manglik considerations
+* Kala Sarpa considerations
+* Pitru Dosha indicators
+* Grahana-related combinations
+* relevant traditional combinations
+
+IMPORTANT:
+
+Do not frighten users.
+
+Never say:
+
+"Your life will be destroyed."
+
+Instead explain:
+
+"இந்த அமைப்பு பாரம்பரிய ஜோதிடத்தில் இப்படிப் பொருள் கொள்ளப்படுகிறது..."
+
+Show severity:
+
+Low
+Moderate
+Strong
+
+And explain the actual rule that triggered it.
+
+---
+
+# 23. FAVORABLE INFORMATION
+
+Create a section:
+
+"அதிர்ஷ்ட தகவல்கள்"
+
+Include where astrologically appropriate:
+
+* சாதகமான நிறங்கள்
+* சாதகமான நாட்கள்
+* சாதகமான எண்கள்
+* சாதகமான திசைகள்
+* சாதகமான காலங்கள்
+* முக்கியமான நட்சத்திர நாட்கள்
+
+Do not manufacture these values.
+
+They must be derived from defined astrology rules.
+
+---
+
+# 24. REMEDIES / PARIHARAM
+
+Create:
+
+"பரிகாரங்கள்"
+
+Possible traditional recommendations:
+
+* Mantra
+* Temple worship
+* Charity
+* Fasting
+* Prayer
+* Meditation
+* Traditional devotional practices
+
+Clearly label these as:
+
+"பாரம்பரிய ஜோதிட பரிந்துரைகள்"
+
+Do not make medical claims.
+
+Do not require expensive purchases.
+
+Avoid fear-based remedies.
+
+---
+
+# 25. AI INTERPRETATION ENGINE
+
+The AI receives ONLY structured calculated data.
+
+Example:
+
+SYSTEM:
+You are an experienced Tamil Vedic astrology interpreter.
+
+INPUT:
+{
+calculated_jathakam_json
+}
+
+TASK:
+Interpret the supplied calculations.
+
+RULES:
+
+1. Never change planetary positions.
+2. Never invent missing information.
+3. Never calculate astronomy yourself.
+4. Never claim certainty for uncertain predictions.
+5. Explain the astrological reasoning.
+6. Use natural Tamil.
+7. Use clear headings.
+8. Separate facts from interpretations.
+9. Mention confidence where birth-time accuracy is uncertain.
+10. Avoid fear-based language.
+11. Avoid medical diagnosis.
+12. Avoid guaranteed financial claims.
+13. Do not claim past-life statements as proven facts.
+14. Do not invent exact events.
+
+---
+
+# 26. TAMIL OUTPUT
+
+Tamil is the default.
+
+The output should be professional Tamil, not literal machine translation.
+
+Use terminology such as:
+
+ஜாதகம்
+லக்னம்
+ராசி
+நட்சத்திரம்
+பாதம்
+பாவம்
+பாவாதிபதி
+தசை
+புத்தி
+கோச்சாரம்
+யோகம்
+தோஷம்
+பரிகாரம்
+செல்வம்
+தொழில்
+திருமணம்
+குடும்பம்
+உடல்நலம்
+கல்வி
+சொத்து
+
+Avoid excessive English.
+
+If technical English is necessary, put it in parentheses only where useful.
+
+Example:
+
+"விம்சோத்தரி தசை (Vimshottari Dasha)"
+
+---
+
+# 27. LANGUAGE SELECTOR
+
+At the beginning ask:
+
+"உங்களுக்கு எந்த மொழியில் ஜாதக அறிக்கையைப் பெற விரும்புகிறீர்கள்?"
+
+Options:
+
+தமிழ்
+English
+
+Future architecture should support:
+
+Sinhala
+Malayalam
+Hindi
+Telugu
+Kannada
+Malay
+
+But Tamil and English are the first implementation.
+
+---
+
+# 28. REPORT STRUCTURE
+
+The final report should look like:
+
+================================
+
+ஜாதக அறிக்கை
+
+பெயர்:
+பிறந்த தேதி:
+பிறந்த நேரம்:
+பிறந்த இடம்:
+
+================================
+
+1. ஜாதகத்தின் சுருக்கம்
+
+2. லக்னம் மற்றும் ராசி
+
+3. நட்சத்திரம் மற்றும் பாதம்
+
+4. கிரக நிலைகள்
+
+5. ராசி கட்டம்
+
+6. நவாம்ச கட்டம்
+
+7. 12 பாவங்களின் விளக்கம்
+
+8. கிரக பலன்கள்
+
+9. முக்கிய யோகங்கள்
+
+10. தோஷங்கள்
+
+11. விம்சோத்தரி தசை
+
+12. தற்போதைய தசை
+
+13. கோச்சார பலன்கள்
+
+14. கடந்த கால வாழ்க்கை விளக்கம்
+
+15. தற்போதைய வாழ்க்கை நிலை
+
+16. எதிர்கால வாழ்க்கை
+
+17. உடல்நலம்
+
+18. செல்வம்
+
+19. தொழில்
+
+20. வியாபாரம்
+
+21. திருமணம்
+
+22. குடும்பம்
+
+23. குழந்தைகள்
+
+24. கல்வி
+
+25. வெளிநாடு
+
+26. சொத்து
+
+27. ஆன்மிகம்
+
+28. சாதகமான காலங்கள்
+
+29. சாதகமான நாட்கள்
+
+30. சாதகமான நிறங்கள்
+
+31. சாதகமான எண்கள்
+
+32. பரிகாரங்கள்
+
+33. முக்கியமான வாழ்க்கை காலவரிசை
+
+34. இறுதி சுருக்கம்
+
+================================
+
+# 29. LIFE TIMELINE
+
+Create a visual timeline.
+
+Example:
+
+வயது 18–22
+→ கல்வி / தொழில் மாற்றம்
+
+வயது 25–29
+→ வருமான வாய்ப்பு
+
+வயது 30–34
+→ குடும்ப / தொழில் வளர்ச்சி
+
+etc.
+
+These must be derived from Dasha + transit + relevant chart indicators.
+
+Do not create random timelines.
+
+---
+
+# 30. PREDICTION CONFIDENCE
+
+Every major prediction should internally have a confidence score.
+
+Example:
+
+HIGH
+MEDIUM
+LOW
+
+Based on:
+
+* Birth time accuracy
+* Number of supporting astrological factors
+* Dasha support
+* Transit support
+* conflicting indications
+
+Do not necessarily show numerical percentages to the user.
+
+Instead say:
+
+"வலுவான சாத்தியம்"
+
+"மிதமான சாத்தியம்"
+
+"கவனிக்க வேண்டிய ஒரு சாத்தியம்"
+
+---
+
+# 31. DATABASE
+
+Create database tables/models for:
+
+users
+birth_profiles
+birth_locations
+jathakams
+planets
+houses
+divisional_charts
+dashas
+transits
+yogas
+doshas
+predictions
+reports
+remedies
+language_settings
+calculation_settings
+
+Store the complete calculated chart so it does not need to be recalculated every time.
+
+---
+
+# 32. AI MODEL ARCHITECTURE
+
+Create an abstraction layer:
+
+AIProvider
+
+Implement providers such as:
+
+OpenAI
+Anthropic
+Google Gemini
+NVIDIA NIM
+Ollama/local models
+
+The application must not hard-code one AI provider.
+
+API keys must be stored securely.
+
+Create:
+
+Settings → AI Provider → API Key → Model
+
+Never put API keys inside source code.
+
+---
+
+# 33. PROMPT MANAGEMENT
+
+Do NOT hard-code the entire astrology prompt inside Python/Flutter code.
+
+Create versioned prompt templates.
+
+Example:
+
+prompts/
+tamil/
+basic_reading.md
+health.md
+wealth.md
+career.md
+marriage.md
+karma.md
+future.md
+english/
+basic_reading.md
+health.md
+wealth.md
+career.md
+marriage.md
+karma.md
+future.md
+
+Allow prompt versions.
+
+Example:
+
+ASTROLOGY_PROMPT_VERSION=1.0
+
+---
+
+# 34. RAG / KNOWLEDGE BASE
+
+Create an optional astrology knowledge base.
+
+Store trusted/reference material covering:
+
+* Vedic astrology principles
+* Parashara principles
+* Vimshottari Dasha
+* Nakshatras
+* House meanings
+* Planetary significations
+* Yoga rules
+* Traditional Tamil astrology terminology
+
+The AI should retrieve relevant rules before producing interpretations.
+
+IMPORTANT:
+
+The knowledge base must not override the deterministic calculation engine.
+
+Calculation engine = source of truth for astronomical positions.
+
+Knowledge base = source of truth for documented interpretation rules.
+
+AI = explanation layer.
+
+---
+
+# 35. ADMIN PANEL
+
+Create an admin panel.
+
+Admin can:
+
+* Manage users
+* Manage astrology rules
+* Manage yoga rules
+* Manage dosha rules
+* Manage remedies
+* Manage prompts
+* Manage languages
+* Manage AI providers
+* Manage API keys
+* View generated reports
+* View calculation logs
+* View AI usage
+* View token usage
+* View errors
+
+---
+
+# 36. AUDIT / DEBUG MODE
+
+Create a developer/debug mode.
+
+When enabled show:
+
+Birth input
+Timezone
+Latitude
+Longitude
+Ayanamsa
+Julian date
+Planetary longitudes
+House calculations
+Nakshatra calculations
+Dasha calculations
+Transit calculations
+Yoga rules triggered
+Dosha rules triggered
+AI prompt version
+AI model
+AI response metadata
+
+This is essential for debugging incorrect astrology results.
+
+---
+
+# 37. IMPORTANT ACCURACY REQUIREMENT
+
+The architecture must be:
+
+BIRTH DATA
+
+↓
+
+LOCATION + TIMEZONE VALIDATION
+
+↓
+
+ASTRONOMICAL EPHEMERIS
+
+↓
+
+PLANETARY POSITIONS
+
+↓
+
+LAGNA
+
+↓
+
+RASI
+
+↓
+
+NAKSHATRA
+
+↓
+
+HOUSES
+
+↓
+
+DIVISIONAL CHARTS
+
+↓
+
+DASHA
+
+↓
+
+TRANSITS
+
+↓
+
+YOGA / DOSHA RULE ENGINE
+
+↓
+
+STRUCTURED JATHAKAM JSON
+
+↓
+
+AI INTERPRETATION
+
+↓
+
+TAMIL REPORT
+
+Never:
+
+Birth Data → LLM → invented horoscope
+
+---
+
+# 38. TESTING
+
+Create automated tests.
+
+Test:
+
+* Known birth charts
+* Planet positions
+* Lagna
+* Nakshatra
+* Pada
+* House placement
+* Dasha dates
+* Rasi chart
+* Navamsa
+* Yoga detection
+* Dosha detection
+* Tamil output
+* Language switching
+
+Create regression tests using known reference calculations.
+
+Every change to the astrology calculation engine must run the complete test suite.
+
+---
+
+# 39. USER EXPERIENCE
+
+The UI should be modern and premium.
+
+Main dashboard:
+
+[ புதிய ஜாதகம் உருவாக்கு ]
+
+[ எனது ஜாதகங்கள் ]
+
+[ அறிக்கைகள் ]
+
+[ அமைப்புகள் ]
+
+New Jathakam:
+
+Step 1:
+பிறப்பு விவரங்கள்
+
+Step 2:
+பிறந்த இடம்
+
+Step 3:
+கணிப்பு அமைப்புகள்
+
+Step 4:
+ஜாதகம் உருவாக்கு
+
+Step 5:
+AI விளக்கம்
+
+Step 6:
+முழு அறிக்கை
+
+---
+
+# 40. REPORT EXPORT
+
+Support:
+
+PDF
+Print
+Share
+Download
+
+Tamil PDF must render Unicode Tamil correctly.
+
+Use an appropriate Tamil Unicode font.
+
+The report should look like a professional astrology report.
+
+---
+
+# 41. PRIVACY
+
+Birth information is personal data.
+
+Implement:
+
+* Authentication
+* Encryption where appropriate
+* Secure API key storage
+* Database access control
+* User deletion
+* Report deletion
+* Privacy policy support
+
+Do not expose one user's birth data to another user.
+
+---
+
+# 42. COMMERCIAL ARCHITECTURE
+
+Design the system so it can later be sold commercially.
+
+Plans:
+
+FREE
+BASIC
+PREMIUM
+PROFESSIONAL
+ASTROLOGER
+
+Possible limits:
+
+Free:
+Basic Jathakam
+
+Premium:
+Full AI interpretation
+
+Professional:
+Detailed predictions
+Dasha
+Transit
+Life timeline
+PDF report
+
+Astrologer:
+Multiple customer profiles
+Customer management
+Branded reports
+
+Do not implement payment initially unless required. Prepare the architecture for it.
+
+---
+
+# 43. ERROR HANDLING
+
+If birth time is missing:
+
+Do not generate a normal accurate Jathakam.
+
+Show:
+
+"பிறந்த நேரம் இல்லாததால் லக்னம் மற்றும் பாவ அடிப்படையிலான கணிப்புகளில் துல்லியம் குறையலாம்."
+
+If location cannot be found:
+
+Ask the user to manually select/correct location.
+
+If timezone is uncertain:
+
+Show a warning.
+
+If AI fails:
+
+The calculated Jathakam must still be available.
+
+The application must never lose the deterministic calculation because of AI failure.
+
+---
+
+# 44. DISCLAIMER
+
+Every generated report must contain a small disclaimer:
+
+"இந்த அறிக்கை பாரம்பரிய ஜோதிடக் கொள்கைகளின் அடிப்படையில் உருவாக்கப்பட்ட ஒரு விளக்கமாகும். இது அறிவியல் உறுதி செய்யப்பட்ட எதிர்கால கணிப்பு அல்ல. உடல்நலம், நிதி, சட்டம் அல்லது வாழ்க்கையின் முக்கிய முடிவுகளுக்கு தகுதியான நிபுணர்களின் ஆலோசனையைப் பெறவும்."
+
+---
+
+# 45. DEVELOPMENT METHOD
+
+Do NOT try to build the entire application in one step.
+
+First inspect the existing project.
+
+Then create a detailed implementation plan.
+
+Break development into phases.
+
+PHASE 1
+Project architecture
+
+PHASE 2
+Database
+
+PHASE 3
+Birth data + location engine
+
+PHASE 4
+Astronomical calculation engine
+
+PHASE 5
+Rasi + Nakshatra + Lagna
+
+PHASE 6
+South Indian chart renderer
+
+PHASE 7
+Navamsa
+
+PHASE 8
+House analysis
+
+PHASE 9
+Vimshottari Dasha
+
+PHASE 10
+Transit engine
+
+PHASE 11
+Yoga engine
+
+PHASE 12
+Dosha engine
+
+PHASE 13
+AI interpretation
+
+PHASE 14
+Tamil language system
+
+PHASE 15
+Full report generator
+
+PHASE 16
+PDF generation
+
+PHASE 17
+Authentication + user profiles
+
+PHASE 18
+Admin panel
+
+PHASE 19
+Testing
+
+PHASE 20
+Production deployment
+
+After completing each phase:
+
+1. Run tests.
+2. Check for errors.
+3. Fix errors.
+4. Explain what was implemented.
+5. Show files changed.
+6. Do not proceed to the next phase until the current phase is stable.
+
+---
+
+# 46. CODING RULES
+
+Write clean production-quality code.
+
+Use:
+
+* Type hints
+* Environment variables
+* Configuration management
+* Logging
+* Error handling
+* Unit tests
+* Integration tests
+* API validation
+* Modular architecture
+
+Avoid:
+
+* duplicated code
+* hard-coded values
+* hard-coded API keys
+* giant files
+* giant functions
+* undocumented astrology rules
+
+Every important astrology rule must have a comment/documentation explaining its source and implementation logic.
+
+---
+
+# 47. FIRST TASK
+
+DO NOT immediately generate thousands of lines of code.
+
+First:
+
+1. Inspect the current project.
+2. Determine the current technology stack.
+3. Identify what already exists.
+4. Create the recommended architecture.
+5. Create the folder structure.
+6. Identify dependencies.
+7. Identify the astrology calculation library.
+8. Explain how astronomical calculations will work.
+9. Explain the database schema.
+10. Explain the AI architecture.
+11. Explain the Tamil language architecture.
+12. Create a phased implementation plan.
+13. Ask for confirmation before making major architectural changes.
+
+If the project is empty, create the foundation.
+
+Start with PHASE 1 only.
+
+The goal is a reliable commercial-grade Tamil Jathakam AI platform, not a simple demo.

@@ -1,0 +1,477 @@
+// Tamil Jathakam AI Platform — Database Schema (Phase 2)
+// See docs/ARCHITECTURE.md § Database Schema for the table-by-table rationale.
+//
+// Design rules this schema follows:
+// - Astronomical/rule-engine output (planets, houses, dashas, yogas, doshas,
+//   transits, divisional charts) is normalized so downstream engines can
+//   query it directly, NOT locked inside opaque JSON.
+// - `Jathakam.chartData` additionally caches the full computed JSON so a
+//   report view doesn't need to recompute or re-join everything.
+// - `CalculationSetting` records exactly which ayanamsa/engine version
+//   produced a chart — the ayanamsa is never silently changed after the
+//   fact (spec §3).
+// - `Prediction` rows store per-section AI output separately from the
+//   deterministic tables above, so an AI failure never touches calculated
+//   data (spec §43).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  USER
+  ASTROLOGER
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  PROFESSIONAL
+  ASTROLOGER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+// Matches the input-screen accuracy options (spec §2)
+enum BirthTimeAccuracy {
+  EXACT // மிகவும் துல்லியம்
+  WITHIN_5_MIN // சுமார் 5 நிமிடங்கள்
+  WITHIN_15_MIN // சுமார் 15 நிமிடங்கள்
+  WITHIN_30_MIN // சுமார் 30 நிமிடங்கள்
+  UNKNOWN // தெரியவில்லை
+}
+
+// Report/output language. TA is the platform default (spec §26-27).
+enum Language {
+  TA
+  EN
+  SI
+  ML
+  HI
+  TE
+  KN
+  MS
+}
+
+enum Ayanamsa {
+  LAHIRI
+}
+
+enum Graha {
+  SUN
+  MOON
+  MARS
+  MERCURY
+  JUPITER
+  VENUS
+  SATURN
+  RAHU
+  KETU
+  LAGNA
+}
+
+enum Dignity {
+  EXALTED
+  DEBILITATED
+  OWN_SIGN
+  FRIENDLY
+  ENEMY
+  NEUTRAL
+}
+
+enum DivisionalChartType {
+  D1
+  D2
+  D3
+  D4
+  D7
+  D9
+  D10
+  D12
+  D16
+  D20
+  D24
+  D27
+  D30
+  D40
+  D45
+  D60
+}
+
+enum DashaLevel {
+  MAHA
+  ANTAR
+  PRATYANTAR
+}
+
+enum YogaStrength {
+  LOW
+  MODERATE
+  STRONG
+}
+
+enum DoshaSeverity {
+  LOW
+  MODERATE
+  STRONG
+}
+
+enum AIProviderId {
+  ANTHROPIC
+  OPENAI
+  GEMINI
+  NVIDIA_NIM
+  OLLAMA
+}
+
+enum PredictionConfidence {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// ---------------------------------------------------------------------------
+// Users & profiles
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  // Nullable: a Google-sign-in account (googleId set) has no local
+  // password. Password login correctly fails (not crashes) for such an
+  // account — see auth.service.ts's login().
+  passwordHash String?
+  // Google OAuth (spec: "add Gmail login"). Set only for accounts created
+  // or linked via Sign in with Google; null for local email/password
+  // accounts. See auth/google-auth.service.ts.
+  googleId     String?  @unique
+  role         UserRole @default(USER)
+  plan         SubscriptionPlan @default(FREE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  birthProfiles   BirthProfile[]
+  languageSetting LanguageSetting?
+
+  @@map("users")
+}
+
+model BirthProfile {
+  id           String            @id @default(uuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  gender       Gender
+  dateOfBirth  DateTime          @db.Date
+  // Local time-of-birth as entered (HH:mm:ss); paired with BirthLocation.timezone
+  // to derive UTC for the calculation engine. Never store this pre-converted
+  // to UTC — DST rules can change historically and must be re-derivable.
+  timeOfBirth  String
+  timeAccuracy BirthTimeAccuracy @default(EXACT)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  birthLocation BirthLocation?
+  jathakams     Jathakam[]
+
+  @@index([userId])
+  @@map("birth_profiles")
+}
+
+model BirthLocation {
+  id                String       @id @default(uuid())
+  profileId         String       @unique
+  profile           BirthProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  placeName         String
+  country           String
+  latitude          Float
+  longitude         Float
+  // IANA timezone name (e.g. "Asia/Kolkata"), resolved from lat/lng at intake.
+  timezone          String
+  utcOffsetMinutes  Int
+  dstApplicable     Boolean      @default(false)
+  manuallyCorrected Boolean      @default(false)
+  createdAt         DateTime     @default(now())
+
+  @@map("birth_locations")
+}
+
+model LanguageSetting {
+  id       String   @id @default(uuid())
+  userId   String   @unique
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language Language @default(TA)
+
+  @@map("language_settings")
+}
+
+// ---------------------------------------------------------------------------
+// Calculation settings & the Jathakam itself
+// ---------------------------------------------------------------------------
+
+// One row per distinct (ayanamsa, engine version) combination actually used.
+// Referenced by Jathakam so every chart records exactly how it was computed.
+model CalculationSetting {
+  id            String   @id @default(uuid())
+  ayanamsa      Ayanamsa @default(LAHIRI)
+  engineVersion String
+  createdAt     DateTime @default(now())
+
+  jathakams Jathakam[]
+
+  @@unique([ayanamsa, engineVersion])
+  @@map("calculation_settings")
+}
+
+model Jathakam {
+  id                   String   @id @default(uuid())
+  profileId            String
+  profile              BirthProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  calculationSettingId String
+  calculationSetting   CalculationSetting @relation(fields: [calculationSettingId], references: [id])
+  julianDay            Float
+  // Cached full structured jathakam JSON (spec §5) — the source of truth
+  // handed to the AI layer. Normalized tables below are queryable views
+  // over the same computation, kept in sync by the jathakam engine.
+  chartData            Json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  planets          Planet[]
+  houses           House[]
+  divisionalCharts DivisionalChart[]
+  dashas           Dasha[]
+  transits         Transit[]
+  yogas            Yoga[]
+  doshas           Dosha[]
+  predictions      Prediction[]
+  reports          Report[]
+  remedies         Remedy[]
+
+  @@index([profileId])
+  @@map("jathakams")
+}
+
+// ---------------------------------------------------------------------------
+// Calculated chart data (Phases 4-8) — normalized, deterministic, AI never
+// writes to these tables.
+// ---------------------------------------------------------------------------
+
+model Planet {
+  id            String   @id @default(uuid())
+  jathakamId    String
+  jathakam      Jathakam @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  graha         Graha
+  longitude     Float
+  signIndex     Int // 0=மேஷம் ... 11=மீனம்
+  degreeInSign  Float
+  nakshatra     Int // 1-27
+  pada          Int // 1-4
+  house         Int // 1-12
+  retrograde    Boolean @default(false)
+  combust       Boolean @default(false)
+  dignity       Dignity?
+  strengthScore Float? // graha bala, computed in Phase 4/6
+
+  @@unique([jathakamId, graha])
+  @@map("planets")
+}
+
+model House {
+  id          String   @id @default(uuid())
+  jathakamId  String
+  jathakam    Jathakam @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  houseNo     Int // 1-12 (bhava)
+  signIndex   Int
+  lord        Graha
+  lordHouse   Int // house the lord currently occupies
+  occupants   Graha[] // grahas placed in this bhava
+
+  @@unique([jathakamId, houseNo])
+  @@map("houses")
+}
+
+model DivisionalChart {
+  id         String              @id @default(uuid())
+  jathakamId String
+  jathakam   Jathakam            @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  chartType  DivisionalChartType
+  // Per-graha sign/house placement for this divisional chart.
+  data       Json
+
+  @@unique([jathakamId, chartType])
+  @@map("divisional_charts")
+}
+
+model Dasha {
+  id         String     @id @default(uuid())
+  jathakamId String
+  jathakam   Jathakam   @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  level      DashaLevel
+  graha      Graha
+  startDate  DateTime
+  endDate    DateTime
+  parentId   String?
+  parent     Dasha?     @relation("DashaHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Dasha[]    @relation("DashaHierarchy")
+
+  @@index([jathakamId, level])
+  @@index([jathakamId, startDate, endDate])
+  @@map("dashas")
+}
+
+model Transit {
+  id         String   @id @default(uuid())
+  jathakamId String
+  jathakam   Jathakam @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  asOfDate   DateTime
+  graha      Graha
+  signIndex  Int
+  house      Int
+  // e.g. ["SADE_SATI", "ASHTAMA_SHANI", "JUPITER_TRANSIT"]
+  effectTags String[]
+
+  @@index([jathakamId, asOfDate])
+  @@map("transits")
+}
+
+// ---------------------------------------------------------------------------
+// Rule engines (Phases 11-12)
+// ---------------------------------------------------------------------------
+
+model Yoga {
+  id                   String       @id @default(uuid())
+  jathakamId           String
+  jathakam             Jathakam     @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  name                 String
+  strength             YogaStrength
+  participatingPlanets Graha[]
+  participatingHouses  Int[]
+  // Key into i18n/, resolved to Tamil/English prose at render time —
+  // never store rendered text here.
+  interpretationKey    String
+
+  @@map("yogas")
+}
+
+model Dosha {
+  id            String        @id @default(uuid())
+  jathakamId    String
+  jathakam      Jathakam      @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  name          String
+  severity      DoshaSeverity
+  ruleTriggered String
+
+  @@map("doshas")
+}
+
+// ---------------------------------------------------------------------------
+// AI output & reports (Phases 13-16) — kept separate from calculated tables
+// so an AI failure never affects the deterministic chart (spec §43).
+// ---------------------------------------------------------------------------
+
+model Prediction {
+  id            String                @id @default(uuid())
+  jathakamId    String
+  jathakam      Jathakam              @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  // Report section id, e.g. "career", "marriage", "health" (spec §28 numbering)
+  section       String
+  language      Language
+  text          String                @db.Text
+  confidence    PredictionConfidence?
+  aiProvider    AIProviderId?
+  aiModel       String?
+  promptVersion String?
+  createdAt     DateTime              @default(now())
+
+  @@unique([jathakamId, section, language])
+  @@map("predictions")
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  jathakamId  String
+  jathakam    Jathakam @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  language    Language
+  pdfPath     String?
+  generatedAt DateTime @default(now())
+
+  // One PDF per (jathakam, language) — regenerating overwrites the file on
+  // disk and this row, same caching pattern as Prediction (Phase 13).
+  @@unique([jathakamId, language])
+  @@map("reports")
+}
+
+model Remedy {
+  id         String   @id @default(uuid())
+  jathakamId String
+  jathakam   Jathakam @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  // mantra | temple | charity | fasting | prayer | meditation
+  category   String
+  text       String   @db.Text
+
+  @@map("remedies")
+}
+
+// ---------------------------------------------------------------------------
+// Admin panel (Phase 18, spec §35)
+// ---------------------------------------------------------------------------
+
+enum UsageEventType {
+  JATHAKAM_CREATED
+  PREDICTION_GENERATED
+  PDF_GENERATED
+  ERROR
+}
+
+// Audit trail backing spec §35's "View calculation logs / AI usage / token
+// usage / errors" — one unified, queryable log rather than four separate
+// bespoke features. userId/jathakamId are deliberately plain strings, not
+// relations: an audit log must survive the user or jathakam it references
+// being deleted (spec §41's own "User deletion" would otherwise silently
+// erase the record that a deletion happened).
+model UsageLog {
+  id           String         @id @default(uuid())
+  eventType    UsageEventType
+  userId       String?
+  jathakamId   String?
+  aiProvider   AIProviderId?
+  aiModel      String?
+  inputTokens  Int?
+  outputTokens Int?
+  errorMessage String?        @db.Text
+  createdAt    DateTime       @default(now())
+
+  @@index([eventType, createdAt])
+  @@map("usage_logs")
+}
+
+// Admin-managed AI provider credentials (spec §35 "Manage API keys", §41
+// "Secure API key storage") — encrypted at rest (AES-256-GCM, see
+// admin/crypto.util.ts) with a server-side secret from
+// API_KEY_ENCRYPTION_SECRET, never returned in plaintext by any endpoint.
+// AnthropicProvider checks here first, falling back to the
+// ANTHROPIC_API_KEY env var if no row exists.
+model ApiKeyConfig {
+  id           String       @id @default(uuid())
+  provider     AIProviderId @unique
+  encryptedKey String       @db.Text
+  updatedAt    DateTime     @updatedAt
+
+  @@map("api_key_configs")
+}

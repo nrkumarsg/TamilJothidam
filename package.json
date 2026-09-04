@@ -1,0 +1,16 @@
+{
+  "name": "tamil-jathakam-platform",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tamil Vedic Astrology / Jathakam AI platform monorepo",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run start:dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "test:backend": "npm run test --workspace backend"
+  }
+}

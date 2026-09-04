@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test / coverage
+coverage/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+backend/prisma/migrations/dev.db
+
+# Portable local Postgres (no-admin dev DB fallback — see README)
+.devdb/
+
+# Generated PDF reports (Phase 16) — regenerable from DB data, not source
+backend/generated-reports/
+
+# Misc
+*.tsbuildinfo

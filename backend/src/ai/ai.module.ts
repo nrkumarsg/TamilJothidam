@@ -1,0 +1,19 @@
+import { Module } from '@nestjs/common';
+import { InterpretationController } from './interpretation.controller';
+import { InterpretationService } from './interpretation.service';
+import { PromptLoaderService } from './prompt-loader.service';
+import { AiProviderRegistry } from './providers/ai-provider.registry';
+import { AnthropicProvider } from './providers/anthropic.provider';
+import { JathakamModule } from '../jathakam/jathakam.module';
+import { DashaModule } from '../dasha/dasha.module';
+import { AuthModule } from '../auth/auth.module';
+import { LoggingModule } from '../logging/logging.module';
+import { AdminModule } from '../admin/admin.module';
+
+@Module({
+  imports: [JathakamModule, DashaModule, AuthModule, LoggingModule, AdminModule],
+  controllers: [InterpretationController],
+  providers: [InterpretationService, PromptLoaderService, AiProviderRegistry, AnthropicProvider],
+  exports: [InterpretationService],
+})
+export class AiModule {}
