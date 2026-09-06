@@ -66,6 +66,24 @@ Development uses `prisma migrate dev`. **Production must use
 `prisma migrate deploy`**, which applies committed migrations and never
 generates or resets anything.
 
+**If your Postgres sits behind a connection pooler** (Neon, Supabase, a
+standalone PgBouncer in transaction-pooling mode), migrations need a second
+variable: `DIRECT_URL`, a non-pooled connection string. `schema.prisma`
+declares `directUrl = env("DIRECT_URL")` — Migrate uses session-level
+advisory locks that a transaction-mode pooler breaks, so `migrate deploy`
+(and `migrate dev`, `db push`, `migrate diff`) all need the direct
+connection; the running app never reads `DIRECT_URL` and keeps using the
+pooled `DATABASE_URL` for every normal query. Concretely:
+- **Neon**: the pooled connection string has `-pooler` in the hostname
+  (`ep-xxxx-pooler.region.aws.neon.tech`); `DIRECT_URL` is the same string
+  with `-pooler` removed from the hostname.
+- **No pooler at all** (the `docker-compose.prod.yml` Postgres, or local
+  dev): set `DIRECT_URL` to the exact same value as `DATABASE_URL`.
+
+Every `.env*.example` in this repo sets both, so copying one and filling it
+in covers this automatically — this note is for wiring up a managed
+provider like Neon that isn't one of the checked-in templates.
+
 ```bash
 npx --workspace backend prisma migrate deploy
 ```

@@ -21,6 +21,13 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Migrate commands (migrate deploy, etc.) use session-level advisory locks,
+  // which a transaction-mode connection pooler (PgBouncer, Neon's default
+  // pooled endpoint) breaks. DIRECT_URL bypasses the pooler for migrations
+  // only; the app itself still runs all normal queries through DATABASE_URL.
+  // If your Postgres has no pooler in front of it, set DIRECT_URL to the
+  // same value as DATABASE_URL.
+  directUrl = env("DIRECT_URL")
 }
 
 // ---------------------------------------------------------------------------
