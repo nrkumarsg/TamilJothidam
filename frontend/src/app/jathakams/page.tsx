@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { isLoggedIn } from '@/lib/auth';
+import { getDefaultLanguage } from '@/lib/language';
 import { BirthProfile, JathakamSummary, listJathakamsForProfile, listProfiles } from '@/lib/api';
 import { labels, WizardLanguage } from '../new/labels';
 
@@ -21,7 +22,7 @@ interface ChartRow {
 export default function MyChartsPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
-  const [language, setLanguage] = useState<WizardLanguage>('ta');
+  const [language, setLanguage] = useState<WizardLanguage>(getDefaultLanguage);
   const [rows, setRows] = useState<ChartRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 

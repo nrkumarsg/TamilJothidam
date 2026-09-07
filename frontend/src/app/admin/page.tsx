@@ -364,6 +364,8 @@ function ApiKeysTab() {
               <th style={thStyle}>Configured</th>
               <th style={thStyle}>Key (masked)</th>
               <th style={thStyle}>Updated</th>
+              <th style={thStyle}>Credit balance</th>
+              <th style={thStyle}>Dashboard</th>
               <th style={thStyle}></th>
             </tr>
           </thead>
@@ -374,6 +376,22 @@ function ApiKeysTab() {
                 <td style={tdStyle}>{k.configured ? 'Yes' : 'No'}</td>
                 <td style={tdStyle}>{k.maskedKey ?? '—'}</td>
                 <td style={tdStyle}>{k.updatedAt ? new Date(k.updatedAt).toLocaleDateString() : '—'}</td>
+                <td style={tdStyle}>
+                  {k.creditBalance ? (
+                    `${k.creditBalance.totalBalance ?? '?'} ${k.creditBalance.currency ?? ''}`.trim()
+                  ) : k.creditCheckError ? (
+                    <span style={{ color: '#c0392b', fontSize: '0.8rem' }} title={k.creditCheckError}>
+                      check failed
+                    </span>
+                  ) : (
+                    <span style={{ color: '#999' }}>— (see dashboard)</span>
+                  )}
+                </td>
+                <td style={tdStyle}>
+                  <a href={k.dashboardUrl} target="_blank" rel="noreferrer">
+                    Open ↗
+                  </a>
+                </td>
                 <td style={tdStyle}>
                   {k.configured && (
                     <button type="button" style={dangerBtn} onClick={() => handleDelete(k.provider)}>

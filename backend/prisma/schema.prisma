@@ -268,6 +268,7 @@ model Jathakam {
   yogas            Yoga[]
   doshas           Dosha[]
   predictions      Prediction[]
+  aiQuestions      AiQuestion[]
   reports          Report[]
   remedies         Remedy[]
 
@@ -411,6 +412,27 @@ model Prediction {
   @@map("predictions")
 }
 
+// Free-text "ask the chart a question" (e.g. "when can I go abroad?",
+// "when will I get married?") — unlike Prediction, there is no fixed
+// section id and no caching key: every question is its own row, and the
+// full history for a jathakam is shown back to the user as a thread.
+model AiQuestion {
+  id            String                @id @default(uuid())
+  jathakamId    String
+  jathakam      Jathakam              @relation(fields: [jathakamId], references: [id], onDelete: Cascade)
+  language      Language
+  question      String                @db.Text
+  answer        String                @db.Text
+  confidence    PredictionConfidence?
+  aiProvider    AIProviderId?
+  aiModel       String?
+  promptVersion String?
+  createdAt     DateTime              @default(now())
+
+  @@index([jathakamId])
+  @@map("ai_questions")
+}
+
 model Report {
   id          String   @id @default(uuid())
   jathakamId  String
@@ -443,6 +465,7 @@ model Remedy {
 enum UsageEventType {
   JATHAKAM_CREATED
   PREDICTION_GENERATED
+  QUESTION_ANSWERED
   PDF_GENERATED
   ERROR
 }

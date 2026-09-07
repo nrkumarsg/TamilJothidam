@@ -1,0 +1,127 @@
+import type { Config } from 'tailwindcss';
+
+// Design tokens lifted verbatim from the Stitch (Google AI UI design tool)
+// mockups for the Chart Details screen, so every page styled against this
+// config matches those mockups pixel-for-pixel instead of approximating them.
+const config: Config = {
+  darkMode: 'class',
+  content: ['./src/app/**/*.{ts,tsx}', './src/components/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        // A "gold + silver on sandalwood" theme: warm sandal (சந்தனம்)
+        // neutrals for every background/surface, a deep antique-gold
+        // primary for buttons/active states, and a pewter-silver secondary
+        // for accents and status chips — replacing Stitch's raw pink/maroon
+        // export with metallic tones that read as traditional and premium
+        // against the cream base instead of loud or fear-toned.
+        'primary-container': '#6b4e12',
+        'on-surface-variant': '#5c4f3a',
+        'surface-container-high': '#ebdec1',
+        'on-surface': '#241c10',
+        'on-background': '#241c10',
+        'on-primary': '#ffffff',
+        'surface-dim': '#e6d9c3',
+        'surface-bright': '#fbf3e6',
+        'on-secondary-fixed-variant': '#4a4a42',
+        'tertiary-container': '#1a2938',
+        tertiary: '#051423',
+        surface: '#fbf3e6',
+        'secondary-fixed': '#d6d3c4',
+        'on-error': '#ffffff',
+        'surface-variant': '#ece0c5',
+        'on-secondary': '#ffffff',
+        'surface-tint': '#8c6b1e',
+        'inverse-surface': '#332c20',
+        'on-error-container': '#93000a',
+        'on-secondary-container': '#4a4a42',
+        secondary: '#6e6e66',
+        'tertiary-fixed': '#d4e4f9',
+        'secondary-fixed-dim': '#b8b5a6',
+        'secondary-container': '#e3e1d6',
+        outline: '#8a7a5e',
+        'surface-container': '#f1e6cf',
+        'inverse-on-surface': '#f7efdf',
+        'on-tertiary': '#ffffff',
+        'tertiary-fixed-dim': '#b8c8dc',
+        error: '#ba1a1a',
+        'on-primary-fixed': '#3a2c0a',
+        'outline-variant': '#d9c9a8',
+        primary: '#8c6b1e',
+        'on-secondary-fixed': '#2a2a24',
+        'surface-container-low': '#f7efdf',
+        'inverse-primary': '#d9b45c',
+        background: '#fbf3e6',
+        'on-primary-fixed-variant': '#6b4e12',
+        'primary-fixed-dim': '#d9b45c',
+        'on-tertiary-fixed-variant': '#394859',
+        'on-tertiary-container': '#8190a3',
+        'error-container': '#ffe0d0',
+        // Pale turmeric-gold instead of stark white — cards and chart cells
+        // should read as auspicious (பசுமஞ்சள்/gold) paper, not clinical.
+        'surface-container-lowest': '#fff8e6',
+        'primary-fixed': '#f5dfa0',
+        'surface-container-highest': '#e4d5b3',
+        'on-primary-container': '#f5dfa0',
+        'on-tertiary-fixed': '#0d1d2c',
+      },
+      borderRadius: {
+        DEFAULT: '0.25rem',
+        lg: '0.5rem',
+        xl: '0.75rem',
+        full: '9999px',
+      },
+      spacing: {
+        'margin-desktop': '3rem',
+        'space-3xl': '4rem',
+        'space-3xs': '0.125rem',
+        'space-lg': '1.5rem',
+        'margin-mobile': '1rem',
+        'space-2xs': '0.25rem',
+        'space-xs': '0.5rem',
+        'space-sm': '0.75rem',
+        'margin-tablet': '2rem',
+        'space-xl': '2rem',
+        'gutter-mobile': '1rem',
+        'space-md': '1rem',
+        'space-2xl': '3rem',
+        'gutter-desktop': '1.5rem',
+      },
+      fontFamily: {
+        'label-sm': ['Inter', 'sans-serif'],
+        'title-md': ['Inter', 'sans-serif'],
+        'title-lg': ['Inter', 'sans-serif'],
+        'headline-lg-mobile': ['Newsreader', 'serif'],
+        'body-sm': ['Inter', 'sans-serif'],
+        'body-lg': ['Inter', 'sans-serif'],
+        display: ['Newsreader', 'serif'],
+        'body-md': ['Inter', 'sans-serif'],
+        'label-md': ['Inter', 'sans-serif'],
+        'headline-lg': ['Newsreader', 'serif'],
+        'label-lg': ['Inter', 'sans-serif'],
+        'display-mobile': ['Newsreader', 'serif'],
+        'headline-md': ['Newsreader', 'serif'],
+        'headline-sm': ['Newsreader', 'serif'],
+      },
+      fontSize: {
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.05em', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', fontWeight: '600' }],
+        'title-lg': ['18px', { lineHeight: '26px', fontWeight: '600' }],
+        'headline-lg-mobile': ['26px', { lineHeight: '34px', fontWeight: '600' }],
+        'body-sm': ['12px', { lineHeight: '18px', fontWeight: '400' }],
+        'body-lg': ['16px', { lineHeight: '26px', fontWeight: '400' }],
+        display: ['44px', { lineHeight: '52px', letterSpacing: '-0.02em', fontWeight: '500' }],
+        'body-md': ['14px', { lineHeight: '22px', fontWeight: '400' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.04em', fontWeight: '500' }],
+        'headline-lg': ['32px', { lineHeight: '40px', fontWeight: '600' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0.02em', fontWeight: '500' }],
+        'display-mobile': ['32px', { lineHeight: '40px', letterSpacing: '-0.01em', fontWeight: '500' }],
+        'headline-md': ['24px', { lineHeight: '32px', fontWeight: '600' }],
+        'headline-sm': ['20px', { lineHeight: '28px', fontWeight: '600' }],
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;

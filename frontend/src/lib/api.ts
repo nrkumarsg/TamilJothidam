@@ -405,6 +405,40 @@ export async function listPredictions(jathakamId: string): Promise<Prediction[]>
   return parseJsonOrThrow(res);
 }
 
+// Mirrors backend/src/ai/ask-question.service.ts — free-text "ask the
+// chart a question" (e.g. "when can I go abroad?"), the counterpart to the
+// fixed-section Prediction above for questions that don't fit any section.
+export interface AiQuestion {
+  id: string;
+  jathakamId: string;
+  language: PredictionLanguage;
+  question: string;
+  answer: string;
+  confidence: PredictionConfidence | null;
+  aiProvider: string | null;
+  aiModel: string | null;
+  promptVersion: string | null;
+  createdAt: string;
+}
+
+export async function askQuestion(
+  jathakamId: string,
+  question: string,
+  language: PredictionLanguage,
+): Promise<AiQuestion> {
+  const res = await authFetch(`${API_BASE_URL}/jathakams/${jathakamId}/ask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, language }),
+  });
+  return parseJsonOrThrow(res);
+}
+
+export async function listQuestions(jathakamId: string): Promise<AiQuestion[]> {
+  const res = await authFetch(`${API_BASE_URL}/jathakams/${jathakamId}/ask`);
+  return parseJsonOrThrow(res);
+}
+
 // Mirrors backend/src/i18n/glossary.ts (Phase 14).
 export interface Glossary {
   defaultLocale: 'ta' | 'en';

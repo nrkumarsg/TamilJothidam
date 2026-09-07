@@ -78,11 +78,20 @@ export async function listUsageLogs(eventType?: UsageLogEntry['eventType']): Pro
   return parseJsonOrThrow(await authFetch(`${API_BASE_URL}/admin/usage${params}`));
 }
 
+export interface ApiKeyCreditBalance {
+  available: boolean;
+  totalBalance?: string;
+  currency?: string;
+}
+
 export interface ApiKeyStatus {
   provider: string;
   configured: boolean;
   maskedKey: string | null;
   updatedAt: string | null;
+  dashboardUrl: string;
+  creditBalance: ApiKeyCreditBalance | null;
+  creditCheckError: string | null;
 }
 
 export async function listApiKeys(): Promise<ApiKeyStatus[]> {

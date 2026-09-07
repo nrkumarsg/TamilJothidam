@@ -7,13 +7,17 @@ import { labels, WizardLanguage } from './labels';
 interface Props {
   language: WizardLanguage;
   jathakamId: string;
+  // 'icon' renders a compact round button for the header banner (matching
+  // the Stitch mockup's header download action); 'button' (default) renders
+  // the full labelled button used in the report card.
+  variant?: 'button' | 'icon';
 }
 
 // PDF generation is a real headless-browser render on the backend (Phase
 // 16) — opt-in like the AI panel, not auto-generated. Generating and
 // downloading are two steps (POST then GET) so the browser's native
 // download flow handles the file, rather than us buffering it in JS.
-export function PdfDownloadButton({ language, jathakamId }: Props) {
+export function PdfDownloadButton({ language, jathakamId, variant = 'button' }: Props) {
   const t = labels[language];
   const apiLanguage = language === 'ta' ? 'TA' : 'EN';
   const [generating, setGenerating] = useState(false);
@@ -32,29 +36,39 @@ export function PdfDownloadButton({ language, jathakamId }: Props) {
     }
   }
 
+  if (variant === 'icon') {
+    return (
+      <button
+        aria-label={t.downloadPdfAction}
+        className="flex-shrink-0 flex items-center gap-space-2xs px-space-sm py-space-xs rounded-lg bg-primary-container text-on-primary shadow-sm active:scale-95 transition-transform disabled:opacity-60"
+        disabled={generating}
+        title={t.downloadPdfAction}
+        type="button"
+        onClick={handleDownload}
+      >
+        <span className="material-symbols-outlined text-[18px]">download</span>
+        <span className="font-label-md text-label-md hidden sm:inline">{t.downloadPdfAction}</span>
+      </button>
+    );
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-      <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>{t.pdfNote}</p>
+    <div className="flex flex-col gap-space-xs items-start">
+      <p className="font-body-sm text-body-sm text-on-surface-variant m-0">{t.pdfNote}</p>
       {error && (
-        <p style={{ color: '#c0392b', fontSize: '0.85rem', margin: 0 }}>
+        <p className="text-error font-body-sm text-body-sm m-0">
           {t.error}: {error}
         </p>
       )}
-      {generating && <p style={{ color: '#666', fontSize: '0.85rem', margin: 0 }}>{t.pdfGenerating}</p>}
-      <button type="button" style={buttonStyle} disabled={generating} onClick={handleDownload}>
+      {generating && <p className="text-on-surface-variant font-body-sm text-body-sm m-0">{t.pdfGenerating}</p>}
+      <button
+        className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
+        disabled={generating}
+        type="button"
+        onClick={handleDownload}
+      >
         {t.pdfDownloadButton}
       </button>
     </div>
   );
 }
-
-const buttonStyle: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  borderRadius: '6px',
-  border: '1px solid #111',
-  background: '#111',
-  color: 'white',
-  cursor: 'pointer',
-  fontSize: '0.85rem',
-  alignSelf: 'flex-start',
-};

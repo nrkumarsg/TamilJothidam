@@ -17,76 +17,50 @@ export function TransitPanel({ language, transits }: Props) {
   const t = labels[language];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <p style={{ ...noteStyle }}>{t.transitNote}</p>
+    <div className="flex flex-col gap-space-sm">
+      <p className="font-body-sm text-body-sm text-on-surface-variant m-0">{t.transitNote}</p>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', minWidth: '480px' }}>
+      <div className="overflow-x-auto -mx-space-sm px-space-sm">
+        <table className="w-full text-left font-body-sm text-body-sm min-w-[480px]">
           <thead>
-            <tr>
-              <th style={thStyle}>{t.transitGrahaCol}</th>
-              <th style={thStyle}>{t.transitSignCol}</th>
-              <th style={thStyle}>{t.houseFromMoonCol}</th>
-              <th style={thStyle}>{t.houseFromLagnaCol}</th>
+            <tr className="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+              <th className="py-space-2xs px-space-xs rounded-l-lg whitespace-nowrap">{t.transitGrahaCol}</th>
+              <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.transitSignCol}</th>
+              <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.houseFromMoonCol}</th>
+              <th className="py-space-2xs px-space-xs rounded-r-lg whitespace-nowrap">{t.houseFromLagnaCol}</th>
             </tr>
           </thead>
           <tbody>
-            {transits.transits.map((tr) => (
-              <tr key={tr.graha} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={tdStyle}>
+            {transits.transits.map((tr, i) => (
+              <tr key={tr.graha} className={i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low/40'}>
+                <td className="py-space-xs px-space-xs font-title-md text-primary font-semibold">
                   {grahaName(tr.graha, language)}
-                  {tr.retrograde && <span style={{ color: '#999' }}> ({language === 'ta' ? 'வ' : 'R'})</span>}
+                  {tr.retrograde && <span className="text-outline font-body-sm"> ({language === 'ta' ? 'வ' : 'R'})</span>}
                 </td>
-                <td style={tdStyle}>{language === 'ta' ? tr.signName.ta : tr.signName.en}</td>
-                <td style={tdStyle}>{tr.houseFromMoon}</td>
-                <td style={tdStyle}>{tr.houseFromLagna}</td>
+                <td className="py-space-xs px-space-xs">{language === 'ta' ? tr.signName.ta : tr.signName.en}</td>
+                <td className="py-space-xs px-space-xs">{tr.houseFromMoon}</td>
+                <td className="py-space-xs px-space-xs">{tr.houseFromLagna}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div style={flagsBoxStyle}>
+      <div className="rounded-lg bg-surface-container-low p-space-sm font-body-sm text-body-sm flex flex-col gap-space-2xs">
         <div>
-          <strong>{t.sadeSatiLabel}:</strong>{' '}
+          <strong className="text-primary">{t.sadeSatiLabel}:</strong>{' '}
           {transits.sadeSati.active && transits.sadeSati.phase
             ? t.sadeSatiPhase[transits.sadeSati.phase]
             : t.sadeSatiInactive}
         </div>
         <div>
-          <strong>{t.ashtamaShaniLabel}:</strong> {transits.ashtamaShani ? t.yesLabel : t.noLabel}
+          <strong className="text-primary">{t.ashtamaShaniLabel}:</strong>{' '}
+          {transits.ashtamaShani ? t.yesLabel : t.noLabel}
         </div>
         <div>
-          <strong>{t.janmaShaniLabel}:</strong> {transits.janmaShani ? t.yesLabel : t.noLabel}
+          <strong className="text-primary">{t.janmaShaniLabel}:</strong> {transits.janmaShani ? t.yesLabel : t.noLabel}
         </div>
       </div>
     </div>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  textAlign: 'left',
-  padding: '0.35rem 0.5rem',
-  borderBottom: '2px solid #333',
-  whiteSpace: 'nowrap',
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '0.35rem 0.5rem',
-};
-
-const noteStyle: React.CSSProperties = {
-  fontSize: '0.8rem',
-  color: '#666',
-  margin: 0,
-};
-
-const flagsBoxStyle: React.CSSProperties = {
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  padding: '0.6rem 0.75rem',
-  fontSize: '0.85rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.25rem',
-};

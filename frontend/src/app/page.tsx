@@ -3,16 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { clearSession, getStoredUser, StoredUser } from '@/lib/auth';
+import { getStoredUser, StoredUser } from '@/lib/auth';
+import { getDefaultLanguage } from '@/lib/language';
+import { AppHeader } from '@/components/layout/AppHeader';
+import { WizardLanguage } from './new/labels';
 
-// Minimal dashboard shell (spec §39). "புதிய ஜாதகம் உருவாக்கு" (create) and
-// "எனது ஜாதகங்கள்" (my charts, /jathakams) are wired up; "அறிக்கைகள்"
-// (reports) and "அமைப்புகள்" (settings) still need dedicated pages. Auth
-// (Phase 17) gates entry to this page.
+// Minimal dashboard shell (spec §39). "புதிய ஜாதகம் உருவாக்கு" (create),
+// "எனது ஜாதகங்கள்" (my charts, /jathakams), and "அமைப்புகள்" (settings,
+// /settings) are wired up; "அறிக்கைகள்" (reports) still needs a dedicated
+// page. Auth (Phase 17) gates entry to this page.
 export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<StoredUser | null>(null);
   const [checked, setChecked] = useState(false);
+  const [language, setLanguage] = useState<WizardLanguage>(getDefaultLanguage);
 
   useEffect(() => {
     const stored = getStoredUser();
@@ -24,109 +28,51 @@ export default function HomePage() {
     setChecked(true);
   }, [router]);
 
-  function handleLogout() {
-    clearSession();
-    router.push('/login');
-  }
-
   if (!checked) return null;
 
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem',
-        textAlign: 'center',
-        padding: '2rem',
-      }}
-    >
-      <h1 style={{ fontSize: '2rem', margin: 0 }}>தமிழ் ஜாதகம்</h1>
-      <p style={{ color: '#666', margin: 0 }}>Tamil Vedic Astrology / Jathakam AI Platform</p>
-      {user && <p style={{ color: '#999', fontSize: '0.85rem', margin: 0 }}>{user.email}</p>}
+    <main className="min-h-screen bg-surface flex flex-col">
+      <AppHeader
+        language={language}
+        showBack={false}
+        title={language === 'ta' ? 'தமிழ் ஜாதகம்' : 'Tamil Jathakam'}
+        onLanguageChange={setLanguage}
+      />
 
-      <nav
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          marginTop: '2rem',
-          width: '100%',
-          maxWidth: '280px',
-        }}
-      >
-        <Link href="/new" style={primaryLinkStyle}>
-          புதிய ஜாதகம் உருவாக்கு
-        </Link>
-        <Link href="/jathakams" style={secondaryLinkStyle}>
-          எனது ஜாதகங்கள்
-        </Link>
-        <span style={disabledLinkStyle}>அறிக்கைகள்</span>
-        <span style={disabledLinkStyle}>அமைப்புகள்</span>
-        {user?.role === 'ADMIN' && (
-          <Link href="/admin" style={adminLinkStyle}>
-            Admin Panel
+      <div className="flex-1 flex flex-col items-center justify-center px-margin-mobile py-space-2xl text-center gap-space-xs">
+        <h1 className="font-headline-lg text-headline-lg text-primary m-0">தமிழ் ஜாதகம்</h1>
+        <p className="font-body-md text-body-md text-on-surface-variant m-0">Tamil Vedic Astrology / Jathakam AI Platform</p>
+        {user && <p className="font-body-sm text-body-sm text-outline m-0">{user.email}</p>}
+
+        <nav className="flex flex-col gap-space-sm mt-space-xl w-full max-w-[320px]">
+          <Link
+            className="px-space-md py-space-sm rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-sm"
+            href="/new"
+          >
+            புதிய ஜாதகம் உருவாக்கு
           </Link>
-        )}
-        <button type="button" onClick={handleLogout} style={logoutButtonStyle}>
-          வெளியேறு
-        </button>
-      </nav>
-
-      <p style={{ color: '#999', fontSize: '0.85rem', marginTop: '1.5rem' }}>
-        மற்ற பட்டன்கள் அடுத்த கட்டங்களில் செயல்படுத்தப்படும்.
-      </p>
+          <Link
+            className="px-space-md py-space-sm rounded-xl bg-surface-container-lowest border border-outline-variant text-primary font-label-lg text-label-lg shadow-sm"
+            href="/jathakams"
+          >
+            எனது ஜாதகங்கள்
+          </Link>
+          <Link
+            className="px-space-md py-space-sm rounded-xl bg-surface-container-lowest border border-outline-variant text-primary font-label-lg text-label-lg shadow-sm"
+            href="/settings"
+          >
+            அமைப்புகள்
+          </Link>
+          {user?.role === 'ADMIN' && (
+            <Link
+              className="px-space-md py-space-sm rounded-xl bg-surface-container text-on-surface-variant font-label-md text-label-md"
+              href="/admin"
+            >
+              Admin Panel
+            </Link>
+          )}
+        </nav>
+      </div>
     </main>
   );
 }
-
-const primaryLinkStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  borderRadius: '6px',
-  background: '#111',
-  color: 'white',
-  textDecoration: 'none',
-  fontSize: '1rem',
-};
-
-const secondaryLinkStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  borderRadius: '6px',
-  background: 'white',
-  border: '1px solid #111',
-  color: '#111',
-  textDecoration: 'none',
-  fontSize: '1rem',
-};
-
-const disabledLinkStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  borderRadius: '6px',
-  background: '#f0f0f0',
-  color: '#aaa',
-  fontSize: '1rem',
-};
-
-const adminLinkStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  borderRadius: '6px',
-  background: 'white',
-  border: '1px solid #111',
-  color: '#111',
-  textDecoration: 'none',
-  fontSize: '0.9rem',
-};
-
-const logoutButtonStyle: React.CSSProperties = {
-  padding: '0.75rem 1rem',
-  borderRadius: '6px',
-  background: 'white',
-  border: '1px solid #ccc',
-  color: '#555',
-  fontSize: '0.9rem',
-  cursor: 'pointer',
-  marginTop: '0.75rem',
-};

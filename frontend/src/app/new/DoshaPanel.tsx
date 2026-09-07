@@ -8,36 +8,38 @@ interface Props {
   doshas: DoshaEntry[];
 }
 
-const SEVERITY_COLOR: Record<DoshaEntry['severity'], string> = {
-  STRONG: '#a15c00',
-  MODERATE: '#a15c00',
-  LOW: '#666',
+const SEVERITY_BADGE: Record<DoshaEntry['severity'], string> = {
+  STRONG: 'bg-secondary-fixed text-on-secondary-fixed-variant',
+  MODERATE: 'bg-secondary-fixed text-on-secondary-fixed-variant',
+  LOW: 'bg-surface-container text-on-surface-variant',
 };
 
 export function DoshaPanel({ language, doshas }: Props) {
   const t = labels[language];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-      <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>{t.doshaIntro}</p>
+    <div className="flex flex-col gap-space-sm">
+      <p className="font-body-sm text-body-sm text-on-surface-variant m-0">{t.doshaIntro}</p>
 
       {doshas.length === 0 ? (
-        <p style={{ fontSize: '0.85rem', color: '#666' }}>{t.noDoshasFound}</p>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">{t.noDoshasFound}</p>
       ) : (
         doshas.map((dosha) => (
-          <div key={dosha.id} style={cardStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <strong>{dosha.name}</strong>
-              <span style={{ fontSize: '0.75rem', color: SEVERITY_COLOR[dosha.severity], fontWeight: 600 }}>
+          <div key={dosha.id} className="p-space-sm rounded-lg bg-surface-container-low">
+            <div className="flex items-start justify-between gap-space-xs">
+              <strong className="font-title-md text-title-md text-primary">{dosha.name}</strong>
+              <span
+                className={`px-space-xs py-space-3xs rounded-full font-label-sm text-label-sm flex-shrink-0 ${SEVERITY_BADGE[dosha.severity]}`}
+              >
                 {t.doshaSeverity[dosha.severity]}
               </span>
             </div>
             {dosha.description && (
-              <p style={{ margin: '0.25rem 0', fontSize: '0.85rem', color: '#444' }}>
+              <p className="font-body-sm text-body-sm text-on-surface mt-space-xs leading-relaxed">
                 {language === 'ta' ? dosha.description.ta : dosha.description.en}
               </p>
             )}
-            <div style={{ fontSize: '0.78rem', color: '#666' }}>
+            <div className="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
               <strong>{t.doshaRuleLabel}:</strong> {dosha.ruleTriggered}
             </div>
           </div>
@@ -46,9 +48,3 @@ export function DoshaPanel({ language, doshas }: Props) {
     </div>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  padding: '0.6rem 0.75rem',
-};

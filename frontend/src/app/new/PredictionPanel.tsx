@@ -24,10 +24,13 @@ interface Props {
 }
 
 const CONFIDENCE_COLOR: Record<Prediction['confidence'], string> = {
-  HIGH: '#2e7d32',
-  MEDIUM: '#a15c00',
-  LOW: '#a15c00',
+  HIGH: 'text-secondary',
+  MEDIUM: 'text-on-secondary-fixed-variant',
+  LOW: 'text-on-secondary-fixed-variant',
 };
+
+const selectClass =
+  'ml-space-2xs px-space-xs py-space-3xs rounded-lg border border-outline-variant bg-surface-container-lowest font-label-sm text-label-sm text-primary focus:outline-none';
 
 // AI interpretation is opt-in per section (spec §25/§33, Phase 13) — unlike
 // the deterministic panels above, each generation is a real API call with
@@ -87,16 +90,17 @@ export function PredictionPanel({ language, jathakamId, initialPredictions, maha
     }
   }
 
-  const grahaLabel = (graha: string) => (language === 'ta' ? glossary?.grahaNames[graha as Graha]?.ta : glossary?.grahaNames[graha as Graha]?.en) ?? graha;
+  const grahaLabel = (graha: string) =>
+    (language === 'ta' ? glossary?.grahaNames[graha as Graha]?.ta : glossary?.grahaNames[graha as Graha]?.en) ?? graha;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <div style={periodBoxStyle}>
-        <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>{t.palanPeriodLabel}</label>
+    <div className="flex flex-col gap-space-sm">
+      <div className="flex flex-wrap items-center gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+        <label className="font-label-md text-label-md text-primary font-semibold">{t.palanPeriodLabel}</label>
         <select
+          className={selectClass}
           value={periodMode}
           onChange={(e) => setPeriodMode(e.target.value as PalanPeriodMode)}
-          style={selectStyle}
         >
           {PALAN_PERIOD_MODES.map((mode) => (
             <option key={mode} value={mode}>
@@ -106,30 +110,30 @@ export function PredictionPanel({ language, jathakamId, initialPredictions, maha
         </select>
 
         {periodMode === 'NEXT_YEARS' && (
-          <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <label className="font-body-sm text-body-sm flex items-center gap-space-2xs">
             {t.palanPeriodYearsLabel}
             <input
-              type="number"
-              min={1}
+              className={`${selectClass} w-20`}
               max={50}
+              min={1}
+              type="number"
               value={years}
               onChange={(e) => setYears(Number(e.target.value))}
-              style={{ ...selectStyle, width: '5rem' }}
             />
           </label>
         )}
 
         {periodMode === 'UNTIL_DASHA' && (
           <>
-            <label style={{ fontSize: '0.8rem' }}>
+            <label className="font-body-sm text-body-sm">
               {t.palanPeriodUntilMahadashaLabel}
               <select
+                className={selectClass}
                 value={untilMahadashaGraha}
                 onChange={(e) => {
                   setUntilMahadashaGraha(e.target.value as Graha);
                   setUntilAntardashaGraha('');
                 }}
-                style={selectStyle}
               >
                 <option value="">—</option>
                 {mahadashaList.map((m) => (
@@ -141,12 +145,12 @@ export function PredictionPanel({ language, jathakamId, initialPredictions, maha
             </label>
 
             {selectedMahadasha && (
-              <label style={{ fontSize: '0.8rem' }}>
+              <label className="font-body-sm text-body-sm">
                 {t.palanPeriodUntilAntardashaLabel}
                 <select
+                  className={selectClass}
                   value={untilAntardashaGraha}
                   onChange={(e) => setUntilAntardashaGraha(e.target.value as Graha)}
-                  style={selectStyle}
                 >
                   <option value="">{t.palanPeriodUntilAntardashaAny}</option>
                   {selectedMahadasha.antardashas.map((a) => (
@@ -167,34 +171,34 @@ export function PredictionPanel({ language, jathakamId, initialPredictions, maha
         const error = errors[section];
 
         return (
-          <div key={section} style={cardStyle}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
-              <strong>{t.predictionSectionNames[section]}</strong>
+          <div key={section} className="p-space-sm rounded-lg bg-surface-container-low">
+            <div className="flex justify-between items-baseline gap-space-xs">
+              <strong className="font-title-md text-title-md text-primary">{t.predictionSectionNames[section]}</strong>
               {prediction && (
-                <span style={{ fontSize: '0.75rem', color: CONFIDENCE_COLOR[prediction.confidence], fontWeight: 600 }}>
+                <span className={`font-label-sm text-label-sm font-semibold flex-shrink-0 ${CONFIDENCE_COLOR[prediction.confidence]}`}>
                   {t.predictionConfidenceLabel}: {t.predictionConfidence[prediction.confidence]}
                 </span>
               )}
             </div>
 
             {prediction && (
-              <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', color: '#333', margin: '0.5rem 0' }}>
+              <p className="whitespace-pre-wrap font-body-md text-body-md text-on-surface my-space-xs leading-relaxed">
                 {prediction.text}
               </p>
             )}
 
             {error && (
-              <p style={{ color: '#c0392b', fontSize: '0.85rem', margin: '0.25rem 0' }}>
+              <p className="text-error font-body-sm text-body-sm my-space-2xs">
                 {t.error}: {error}
               </p>
             )}
 
-            {isLoading && <p style={{ color: '#666', fontSize: '0.85rem', margin: '0.25rem 0' }}>{t.generating}</p>}
+            {isLoading && <p className="text-on-surface-variant font-body-sm text-body-sm my-space-2xs">{t.generating}</p>}
 
             <button
-              type="button"
-              style={buttonStyle}
+              className="mt-space-2xs px-space-md py-space-2xs rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
               disabled={isLoading}
+              type="button"
               onClick={() => handleGenerate(section, Boolean(prediction))}
             >
               {prediction ? t.regenerateButton : t.generateButton}
@@ -205,38 +209,3 @@ export function PredictionPanel({ language, jathakamId, initialPredictions, maha
     </div>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  padding: '0.6rem 0.75rem',
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: '0.4rem 0.9rem',
-  borderRadius: '6px',
-  border: '1px solid #111',
-  background: 'white',
-  color: '#111',
-  cursor: 'pointer',
-  fontSize: '0.85rem',
-};
-
-const periodBoxStyle: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  alignItems: 'center',
-  gap: '0.6rem',
-  border: '1px dashed #ccc',
-  borderRadius: '4px',
-  padding: '0.6rem 0.75rem',
-  background: '#fafafa',
-};
-
-const selectStyle: React.CSSProperties = {
-  marginLeft: '0.4rem',
-  padding: '0.3rem 0.5rem',
-  borderRadius: '4px',
-  border: '1px solid #ccc',
-  fontSize: '0.85rem',
-};

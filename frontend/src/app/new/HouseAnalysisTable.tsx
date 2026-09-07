@@ -21,48 +21,58 @@ export function HouseAnalysisTable({ language, houseAnalysis }: Props) {
   const t = labels[language];
 
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={tableStyle}>
+    <div className="overflow-x-auto -mx-space-sm px-space-sm">
+      <table className="w-full text-left font-body-sm text-body-sm min-w-[640px]">
         <thead>
-          <tr>
-            <th style={thStyle}>{t.houseCol}</th>
-            <th style={thStyle}>{t.signCol}</th>
-            <th style={thStyle}>{t.significationCol}</th>
-            <th style={thStyle}>{t.lordCol}</th>
-            <th style={thStyle}>{t.occupantsCol}</th>
-            <th style={thStyle}>{t.aspectsCol}</th>
-            <th style={thStyle}>{t.influenceCol}</th>
-            <th style={thStyle}>{t.strengthCol}</th>
+          <tr className="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm">
+            <th className="py-space-2xs px-space-xs rounded-l-lg whitespace-nowrap">{t.houseCol}</th>
+            <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.signCol}</th>
+            <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.significationCol}</th>
+            <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.lordCol}</th>
+            <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.occupantsCol}</th>
+            <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.aspectsCol}</th>
+            <th className="py-space-2xs px-space-xs whitespace-nowrap">{t.influenceCol}</th>
+            <th className="py-space-2xs px-space-xs rounded-r-lg whitespace-nowrap">{t.strengthCol}</th>
           </tr>
         </thead>
         <tbody>
-          {houseAnalysis.map((h) => (
-            <tr key={h.houseNo}>
-              <td style={tdStyle}>
+          {houseAnalysis.map((h, i) => (
+            <tr key={h.houseNo} className={i % 2 === 0 ? 'bg-surface-container-lowest' : 'bg-surface-container-low/40'}>
+              <td className="py-space-xs px-space-xs align-top font-title-md text-primary font-semibold">
                 {h.houseNo}
-                {h.conjunction && <div style={tagStyle}>{t.conjunctionTag}</div>}
+                {h.conjunction && <div className="font-label-sm text-[10px] text-outline">{t.conjunctionTag}</div>}
               </td>
-              <td style={tdStyle}>{language === 'ta' ? h.signName.ta : h.signName.en}</td>
-              <td style={tdStyle}>{language === 'ta' ? h.signification.ta : h.signification.en}</td>
-              <td style={tdStyle}>
+              <td className="py-space-xs px-space-xs align-top">{language === 'ta' ? h.signName.ta : h.signName.en}</td>
+              <td className="py-space-xs px-space-xs align-top">
+                {language === 'ta' ? h.signification.ta : h.signification.en}
+              </td>
+              <td className="py-space-xs px-space-xs align-top">
                 {grahaLabel(h.lord, language)} (H{h.lordHouse})
               </td>
-              <td style={tdStyle}>{grahaList(h.occupants, language, t.none)}</td>
-              <td style={tdStyle}>{grahaList(h.aspectingGrahas, language, t.none)}</td>
-              <td style={tdStyle}>
+              <td className="py-space-xs px-space-xs align-top">{grahaList(h.occupants, language, t.none)}</td>
+              <td className="py-space-xs px-space-xs align-top">{grahaList(h.aspectingGrahas, language, t.none)}</td>
+              <td className="py-space-xs px-space-xs align-top">
                 {h.beneficInfluences.length > 0 && (
-                  <div style={{ color: '#2e7d32' }}>
+                  <div className="text-secondary">
                     {t.beneficShort}: {grahaList(h.beneficInfluences, language, t.none)}
                   </div>
                 )}
                 {h.maleficInfluences.length > 0 && (
-                  <div style={{ color: '#c0392b' }}>
+                  <div className="text-error">
                     {t.maleficShort}: {grahaList(h.maleficInfluences, language, t.none)}
                   </div>
                 )}
                 {h.beneficInfluences.length === 0 && h.maleficInfluences.length === 0 && t.none}
               </td>
-              <td style={tdStyle}>{h.strengthScore !== null ? h.strengthScore.toFixed(2) : t.none}</td>
+              <td className="py-space-xs px-space-xs align-top">
+                {h.strengthScore !== null ? (
+                  <span className="px-space-xs py-space-3xs rounded font-label-sm text-label-sm bg-surface-container-high text-primary font-semibold">
+                    {h.strengthScore.toFixed(2)}
+                  </span>
+                ) : (
+                  t.none
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -70,28 +80,3 @@ export function HouseAnalysisTable({ language, houseAnalysis }: Props) {
     </div>
   );
 }
-
-const tableStyle: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  fontSize: '0.8rem',
-  minWidth: '640px',
-};
-
-const thStyle: React.CSSProperties = {
-  textAlign: 'left',
-  padding: '0.4rem 0.5rem',
-  borderBottom: '2px solid #333',
-  whiteSpace: 'nowrap',
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: '0.4rem 0.5rem',
-  borderBottom: '1px solid #eee',
-  verticalAlign: 'top',
-};
-
-const tagStyle: React.CSSProperties = {
-  fontSize: '0.65rem',
-  color: '#999',
-};

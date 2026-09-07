@@ -9,11 +9,11 @@ interface Props {
   jathakamId: string;
 }
 
-const STATUS_COLOR: Record<ReportSectionStatus, string> = {
-  chart_data: '#2e7d32',
-  ai_generated: '#2e7d32',
-  ai_pending: '#a15c00',
-  unavailable: '#999',
+const STATUS_BADGE: Record<ReportSectionStatus, string> = {
+  chart_data: 'text-secondary',
+  ai_generated: 'text-secondary',
+  ai_pending: 'text-on-secondary-fixed-variant',
+  unavailable: 'text-outline',
 };
 
 // Phase 15's full report generator assembles the fixed 34-section
@@ -38,24 +38,24 @@ export function ReportStructurePanel({ language, jathakamId }: Props) {
 
   if (error) {
     return (
-      <p style={{ color: '#c0392b', fontSize: '0.85rem' }}>
+      <p className="text-error font-body-sm text-body-sm">
         {t.error}: {error}
       </p>
     );
   }
 
   if (!report) {
-    return <p style={{ color: '#666', fontSize: '0.85rem' }}>{t.loadingReport}</p>;
+    return <p className="text-on-surface-variant font-body-sm text-body-sm">{t.loadingReport}</p>;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-      <p style={{ fontSize: '0.8rem', color: '#666', margin: 0 }}>{t.reportStructureNote}</p>
-      <ol style={{ margin: 0, paddingLeft: '1.4rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+    <div className="flex flex-col gap-space-xs">
+      <p className="font-body-sm text-body-sm text-on-surface-variant m-0">{t.reportStructureNote}</p>
+      <ol className="m-0 pl-space-lg flex flex-col gap-space-2xs">
         {report.sections.map((section) => (
-          <li key={section.id} style={{ fontSize: '0.85rem' }}>
+          <li key={section.id} className="font-body-sm text-body-sm text-on-surface">
             <span>{language === 'ta' ? section.title.ta : section.title.en}</span>{' '}
-            <span style={{ color: STATUS_COLOR[section.status], fontSize: '0.75rem' }}>
+            <span className={`font-label-sm text-label-sm ${STATUS_BADGE[section.status]}`}>
               — {t.reportStatus[section.status]}
             </span>
           </li>

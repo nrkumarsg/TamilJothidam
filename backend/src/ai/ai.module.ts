@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { InterpretationController } from './interpretation.controller';
 import { InterpretationService } from './interpretation.service';
+import { AskQuestionController } from './ask-question.controller';
+import { AskQuestionService } from './ask-question.service';
 import { PromptLoaderService } from './prompt-loader.service';
 import { AiProviderRegistry } from './providers/ai-provider.registry';
 import { AnthropicProvider } from './providers/anthropic.provider';
@@ -14,15 +16,16 @@ import { AdminModule } from '../admin/admin.module';
 
 @Module({
   imports: [JathakamModule, DashaModule, AuthModule, LoggingModule, AdminModule],
-  controllers: [InterpretationController],
+  controllers: [InterpretationController, AskQuestionController],
   providers: [
     InterpretationService,
+    AskQuestionService,
     PromptLoaderService,
     AiProviderRegistry,
     AnthropicProvider,
     DeepSeekProvider,
     OllamaProvider,
   ],
-  exports: [InterpretationService],
+  exports: [InterpretationService, AskQuestionService],
 })
 export class AiModule {}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { isLoggedIn } from '@/lib/auth';
+import { getDefaultLanguage } from '@/lib/language';
 import { BirthTimeAccuracy, createBirthProfile, createJathakam, Gender, JathakamSummary } from '@/lib/api';
 import { labels, WizardLanguage } from './labels';
 import { emptyLocation, LocationState, PlaceSearch } from './PlaceSearch';
@@ -30,7 +31,7 @@ const initialForm: FormState = {
 export default function NewJathakamPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
-  const [language, setLanguage] = useState<WizardLanguage>('ta');
+  const [language, setLanguage] = useState<WizardLanguage>(getDefaultLanguage);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -125,6 +126,12 @@ export default function NewJathakamPage() {
               jathakamId={jathakam.id}
               timeAccuracy={form.timeAccuracy}
               initialJathakam={jathakam}
+              profile={{
+                name: form.name,
+                dateOfBirth: form.dateOfBirth,
+                timeOfBirth: form.timeOfBirth,
+                placeName: form.location.placeName,
+              }}
             />
           )}
 
