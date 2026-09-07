@@ -60,94 +60,60 @@ function ForgotPasswordInner() {
   }
 
   return (
-    <main style={pageStyle}>
-      <div style={cardStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.4rem', margin: 0 }}>{t.title}</h1>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="button" onClick={() => setLanguage('ta')} style={language === 'ta' ? langActive : langBtn}>
+    <main className="min-h-screen bg-surface flex items-center justify-center px-margin-mobile py-space-xl">
+      <div className="w-full max-w-[400px] bg-surface-container-lowest rounded-2xl shadow-sm p-space-lg flex flex-col gap-space-md">
+        <div className="flex items-center justify-between gap-space-xs">
+          <h1 className="font-headline-sm text-headline-sm text-primary">{t.title}</h1>
+          <div className="inline-flex items-center p-space-3xs rounded-full bg-surface-container flex-shrink-0">
+            <button
+              className={`px-space-xs py-space-3xs rounded-full font-label-sm text-label-sm ${
+                language === 'ta' ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
+              }`}
+              type="button"
+              onClick={() => setLanguage('ta')}
+            >
               தமிழ்
             </button>
-            <button type="button" onClick={() => setLanguage('en')} style={language === 'en' ? langActive : langBtn}>
+            <button
+              className={`px-space-xs py-space-3xs rounded-full font-label-sm text-label-sm ${
+                language === 'en' ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
+              }`}
+              type="button"
+              onClick={() => setLanguage('en')}
+            >
               English
             </button>
           </div>
         </div>
 
         {sent ? (
-          <p style={{ fontSize: '0.9rem', color: '#333' }}>{t.sentMessage}</p>
+          <p className="font-body-md text-body-md text-on-surface">{t.sentMessage}</p>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <label>
-              {t.email}
+          <form className="flex flex-col gap-space-md" onSubmit={handleSubmit}>
+            <label className="flex flex-col gap-space-2xs">
+              <span className="font-label-md text-label-md text-on-surface-variant">{t.email}</span>
               <input
-                type="email"
                 required
+                className="w-full px-space-sm py-space-xs rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={inputStyle}
               />
             </label>
-            <button type="submit" disabled={submitting} style={primaryButtonStyle}>
+            <button
+              className="w-full py-space-sm rounded-lg bg-primary text-on-primary font-label-lg text-label-lg disabled:opacity-60"
+              disabled={submitting}
+              type="submit"
+            >
               {submitting ? t.submitting : t.submit}
             </button>
           </form>
         )}
 
-        <Link href="/login" style={{ fontSize: '0.85rem' }}>
+        <Link className="font-label-sm text-label-sm text-on-surface-variant" href="/login">
           {t.backLogin}
         </Link>
       </div>
     </main>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '2rem 1rem',
-};
-
-const cardStyle: React.CSSProperties = {
-  width: '100%',
-  maxWidth: '380px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-  border: '1px solid #eee',
-  borderRadius: '10px',
-  padding: '1.5rem',
-};
-
-const inputStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '0.5rem',
-  marginTop: '0.25rem',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-  fontSize: '1rem',
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: '0.6rem 1.4rem',
-  borderRadius: '6px',
-  border: 'none',
-  background: '#111',
-  color: 'white',
-  cursor: 'pointer',
-  fontSize: '1rem',
-};
-
-const langBtn: React.CSSProperties = {
-  padding: '0.25rem 0.75rem',
-  borderRadius: '999px',
-  border: '1px solid #ccc',
-  background: 'white',
-  cursor: 'pointer',
-  fontSize: '0.8rem',
-};
-
-const langActive: React.CSSProperties = { ...langBtn, background: '#111', color: 'white', border: '1px solid #111' };

@@ -7,6 +7,7 @@ import { isLoggedIn } from '@/lib/auth';
 import { getDefaultLanguage } from '@/lib/language';
 import { BirthProfile, JathakamSummary, listJathakamsForProfile, listProfiles } from '@/lib/api';
 import { labels, WizardLanguage } from '../new/labels';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 interface ChartRow {
   profile: BirthProfile;
@@ -64,137 +65,59 @@ export default function MyChartsPage() {
   if (!authChecked) return null;
 
   return (
-    <main style={pageStyle}>
-      <div style={cardStyle}>
-        <div style={headerRowStyle}>
-          <h1 style={{ margin: 0, fontSize: '1.5rem' }}>{t.myChartsTitle}</h1>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              type="button"
-              onClick={() => setLanguage('ta')}
-              style={language === 'ta' ? langButtonActive : langButton}
-            >
-              {t.tamil}
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage('en')}
-              style={language === 'en' ? langButtonActive : langButton}
-            >
-              {t.english}
-            </button>
-          </div>
-        </div>
+    <main className="min-h-screen bg-surface">
+      <AppHeader backHref="/" language={language} title={t.myChartsTitle} onLanguageChange={setLanguage} />
 
+      <div className="px-margin-mobile py-space-md flex flex-col gap-space-sm max-w-[640px] mx-auto">
         {error && (
-          <p style={{ color: '#c0392b' }}>
+          <p className="text-error font-body-md text-body-md">
             {t.error}: {error}
           </p>
         )}
 
-        {!error && rows === null && <p style={{ color: '#666' }}>{t.loadingCharts}</p>}
+        {!error && rows === null && <p className="text-on-surface-variant font-body-md text-body-md">{t.loadingCharts}</p>}
 
         {rows !== null && rows.length === 0 && (
-          <div style={emptyStateStyle}>
-            <p style={{ color: '#666' }}>{t.noChartsYet}</p>
-            <Link href="/new" style={primaryButtonStyle}>
+          <div className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col items-start gap-space-sm">
+            <p className="font-body-md text-body-md text-on-surface-variant m-0">{t.noChartsYet}</p>
+            <Link
+              className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md"
+              href="/new"
+            >
               {t.createFirstChartButton}
             </Link>
           </div>
         )}
 
         {rows !== null && rows.length > 0 && (
-          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <ul className="flex flex-col gap-space-xs list-none p-0 m-0">
             {rows.map(({ profile, jathakam }) => (
-              <li key={profile.id} style={rowStyle}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{profile.name}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#666' }}>
+              <li
+                key={profile.id}
+                className="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex items-center justify-between gap-space-sm"
+              >
+                <div className="min-w-0">
+                  <div className="font-title-md text-title-md text-primary truncate">{profile.name}</div>
+                  <div className="font-body-sm text-body-sm text-on-surface-variant truncate">
                     {t.bornOnLabel}: {profile.dateOfBirth.slice(0, 10)} {profile.timeOfBirth} —{' '}
                     {profile.birthLocation.placeName}
                   </div>
                 </div>
                 {jathakam ? (
-                  <Link href={`/jathakams/${jathakam.id}`} style={primaryButtonStyle}>
+                  <Link
+                    className="flex-shrink-0 px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md"
+                    href={`/jathakams/${jathakam.id}`}
+                  >
                     {t.viewChartButton}
                   </Link>
                 ) : (
-                  <span style={{ fontSize: '0.85rem', color: '#aaa' }}>—</span>
+                  <span className="flex-shrink-0 font-body-sm text-body-sm text-outline">—</span>
                 )}
               </li>
             ))}
           </ul>
         )}
-
-        <p>
-          <Link href="/">← {t.backToDashboard}</Link>
-        </p>
       </div>
     </main>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  padding: '2rem 1rem',
-};
-
-const cardStyle: React.CSSProperties = {
-  width: '100%',
-  maxWidth: '560px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-};
-
-const headerRowStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-};
-
-const langButton: React.CSSProperties = {
-  padding: '0.25rem 0.75rem',
-  borderRadius: '999px',
-  border: '1px solid #ccc',
-  background: 'white',
-  cursor: 'pointer',
-  fontSize: '0.85rem',
-};
-
-const langButtonActive: React.CSSProperties = {
-  ...langButton,
-  background: '#111',
-  color: 'white',
-  border: '1px solid #111',
-};
-
-const rowStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  border: '1px solid #ddd',
-  borderRadius: '6px',
-  padding: '0.75rem 1rem',
-};
-
-const emptyStateStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: '0.75rem',
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  borderRadius: '6px',
-  border: 'none',
-  background: '#111',
-  color: 'white',
-  textDecoration: 'none',
-  fontSize: '0.9rem',
-  cursor: 'pointer',
-  display: 'inline-block',
-};

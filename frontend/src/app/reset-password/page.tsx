@@ -79,15 +79,27 @@ function ResetPasswordInner() {
   }
 
   return (
-    <main style={pageStyle}>
-      <div style={cardStyle}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.4rem', margin: 0 }}>{t.title}</h1>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="button" onClick={() => setLanguage('ta')} style={language === 'ta' ? langActive : langBtn}>
+    <main className="min-h-screen bg-surface flex items-center justify-center px-margin-mobile py-space-xl">
+      <div className="w-full max-w-[400px] bg-surface-container-lowest rounded-2xl shadow-sm p-space-lg flex flex-col gap-space-md">
+        <div className="flex items-center justify-between gap-space-xs">
+          <h1 className="font-headline-sm text-headline-sm text-primary">{t.title}</h1>
+          <div className="inline-flex items-center p-space-3xs rounded-full bg-surface-container flex-shrink-0">
+            <button
+              className={`px-space-xs py-space-3xs rounded-full font-label-sm text-label-sm ${
+                language === 'ta' ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
+              }`}
+              type="button"
+              onClick={() => setLanguage('ta')}
+            >
               தமிழ்
             </button>
-            <button type="button" onClick={() => setLanguage('en')} style={language === 'en' ? langActive : langBtn}>
+            <button
+              className={`px-space-xs py-space-3xs rounded-full font-label-sm text-label-sm ${
+                language === 'en' ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
+              }`}
+              type="button"
+              onClick={() => setLanguage('en')}
+            >
               English
             </button>
           </div>
@@ -95,51 +107,59 @@ function ResetPasswordInner() {
 
         {!token ? (
           <>
-            <p style={{ fontSize: '0.9rem', color: '#c0392b' }}>{t.missingToken}</p>
-            <Link href="/forgot-password" style={{ fontSize: '0.85rem' }}>
+            <p className="text-error font-body-md text-body-md">{t.missingToken}</p>
+            <Link className="font-label-sm text-label-sm text-secondary" href="/forgot-password">
               {t.requestNewLink}
             </Link>
           </>
         ) : success ? (
           <>
-            <p style={{ fontSize: '0.9rem', color: '#333' }}>{t.successMessage}</p>
-            <button type="button" style={primaryButtonStyle} onClick={() => router.push('/login')}>
+            <p className="font-body-md text-body-md text-on-surface">{t.successMessage}</p>
+            <button
+              className="w-full py-space-sm rounded-lg bg-primary text-on-primary font-label-lg text-label-lg"
+              type="button"
+              onClick={() => router.push('/login')}
+            >
               {t.goToLogin}
             </button>
           </>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <label>
-              {t.newPassword}
+          <form className="flex flex-col gap-space-md" onSubmit={handleSubmit}>
+            <label className="flex flex-col gap-space-2xs">
+              <span className="font-label-md text-label-md text-on-surface-variant">{t.newPassword}</span>
               <input
-                type="password"
                 required
+                className="w-full px-space-sm py-space-xs rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
                 minLength={8}
+                type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                style={inputStyle}
               />
-              <span style={{ fontSize: '0.75rem', color: '#999' }}>{t.passwordHint}</span>
+              <span className="font-label-sm text-label-sm text-outline">{t.passwordHint}</span>
             </label>
-            <label>
-              {t.confirmPassword}
+            <label className="flex flex-col gap-space-2xs">
+              <span className="font-label-md text-label-md text-on-surface-variant">{t.confirmPassword}</span>
               <input
-                type="password"
                 required
+                className="w-full px-space-sm py-space-xs rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
                 minLength={8}
+                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                style={inputStyle}
               />
             </label>
 
             {error && (
-              <p style={{ color: '#c0392b', fontSize: '0.85rem', margin: 0 }}>
+              <p className="text-error font-body-sm text-body-sm m-0">
                 {t.error}: {error}
               </p>
             )}
 
-            <button type="submit" disabled={submitting} style={primaryButtonStyle}>
+            <button
+              className="w-full py-space-sm rounded-lg bg-primary text-on-primary font-label-lg text-label-lg disabled:opacity-60"
+              disabled={submitting}
+              type="submit"
+            >
               {submitting ? t.submitting : t.submit}
             </button>
           </form>
@@ -148,53 +168,3 @@ function ResetPasswordInner() {
     </main>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '2rem 1rem',
-};
-
-const cardStyle: React.CSSProperties = {
-  width: '100%',
-  maxWidth: '380px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.25rem',
-  border: '1px solid #eee',
-  borderRadius: '10px',
-  padding: '1.5rem',
-};
-
-const inputStyle: React.CSSProperties = {
-  display: 'block',
-  width: '100%',
-  padding: '0.5rem',
-  marginTop: '0.25rem',
-  border: '1px solid #ccc',
-  borderRadius: '4px',
-  fontSize: '1rem',
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  padding: '0.6rem 1.4rem',
-  borderRadius: '6px',
-  border: 'none',
-  background: '#111',
-  color: 'white',
-  cursor: 'pointer',
-  fontSize: '1rem',
-};
-
-const langBtn: React.CSSProperties = {
-  padding: '0.25rem 0.75rem',
-  borderRadius: '999px',
-  border: '1px solid #ccc',
-  background: 'white',
-  cursor: 'pointer',
-  fontSize: '0.8rem',
-};
-
-const langActive: React.CSSProperties = { ...langBtn, background: '#111', color: 'white', border: '1px solid #111' };
