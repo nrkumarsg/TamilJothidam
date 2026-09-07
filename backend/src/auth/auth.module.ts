@@ -16,6 +16,6 @@ import { JathakamOwnershipGuard } from './jathakam-ownership.guard';
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleAuthService, EmailService, JwtAuthGuard, JathakamOwnershipGuard],
-  exports: [JwtModule, AuthService, JwtAuthGuard, JathakamOwnershipGuard],
+  exports: [JwtModule, AuthService, EmailService, JwtAuthGuard, JathakamOwnershipGuard],
 })
 export class AuthModule {}

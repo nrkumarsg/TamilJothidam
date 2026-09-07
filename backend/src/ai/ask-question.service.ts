@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AiQuestion, Language } from '@prisma/client';
+import { AiQuestion, Language, PredictionConfidence } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { JathakamService } from '../jathakam/jathakam.service';
 import { DashaService } from '../dasha/dasha.service';
@@ -21,6 +21,21 @@ const PROMPT_LANGUAGE: Record<Language, PromptLanguage> = {
   MS: 'en',
 };
 
+interface GeneratedAnswer {
+  text: string;
+  confidence: PredictionConfidence;
+  aiProvider: ReturnType<AiProviderRegistry['getProvider']>['id'];
+  aiModel: string;
+  promptVersion: string;
+}
+
+// A view of an AiQuestion that doesn't require a database row — used for
+// translate(), which deliberately never persists (see its own comment).
+export type AiQuestionView = Pick<
+  AiQuestion,
+  'jathakamId' | 'language' | 'question' | 'answer' | 'confidence' | 'aiProvider' | 'aiModel' | 'promptVersion'
+> & { id: string; createdAt: Date };
+
 // Free-text "ask the chart a question" (e.g. "when can I go abroad?",
 // "will my spouse work?") — the counterpart to InterpretationService's
 // fixed 34-section reports, for questions that don't fit any of them.
@@ -39,6 +54,39 @@ export class AskQuestionService {
   ) {}
 
   async ask(jathakamId: string, question: string, language: Language): Promise<AiQuestion> {
+    const { text, confidence, aiProvider, aiModel, promptVersion } = await this.generate(
+      jathakamId,
+      question,
+      language,
+    );
+    return this.prisma.aiQuestion.create({
+      data: { jathakamId, language, question, answer: text, confidence, aiProvider, aiModel, promptVersion },
+    });
+  }
+
+  // Re-answers the same question in a different display language without
+  // writing a new row — used when the user toggles the "Ask Your Chart"
+  // panel's language after already asking something. Every real, distinct
+  // question the user types goes through ask() and is saved; this is
+  // purely a rendering aid so the history list doesn't fill up with one
+  // extra row per language a viewer happens to toggle through.
+  async translate(jathakamId: string, question: string, language: Language): Promise<AiQuestionView> {
+    const generated = await this.generate(jathakamId, question, language);
+    return {
+      id: `translated-${Date.now()}`,
+      jathakamId,
+      language,
+      question,
+      answer: generated.text,
+      confidence: generated.confidence,
+      aiProvider: generated.aiProvider,
+      aiModel: generated.aiModel,
+      promptVersion: generated.promptVersion,
+      createdAt: new Date(),
+    };
+  }
+
+  private async generate(jathakamId: string, question: string, language: Language): Promise<GeneratedAnswer> {
     const jathakam = await this.jathakamService.findOne(jathakamId);
     const profile = await this.prisma.birthProfile.findUnique({ where: { id: jathakam.profileId } });
     if (!profile) throw new NotFoundException(`Birth profile for jathakam ${jathakamId} not found`);
@@ -111,21 +159,13 @@ export class AskQuestionService {
       outputTokens: result.usage?.outputTokens,
     });
 
-    const promptVersion = process.env.ASTROLOGY_PROMPT_VERSION ?? '1.0';
-    const confidence = confidenceFromTimeAccuracy(profile.timeAccuracy);
-
-    return this.prisma.aiQuestion.create({
-      data: {
-        jathakamId,
-        language,
-        question,
-        answer: result.text,
-        confidence,
-        aiProvider: servedBy,
-        aiModel: result.model,
-        promptVersion,
-      },
-    });
+    return {
+      text: result.text,
+      confidence: confidenceFromTimeAccuracy(profile.timeAccuracy),
+      aiProvider: servedBy,
+      aiModel: result.model,
+      promptVersion: process.env.ASTROLOGY_PROMPT_VERSION ?? '1.0',
+    };
   }
 
   async listForJathakam(jathakamId: string): Promise<AiQuestion[]> {

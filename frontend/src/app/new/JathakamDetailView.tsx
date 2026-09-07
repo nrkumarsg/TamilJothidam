@@ -296,6 +296,10 @@ export function JathakamDetailView({ language, jathakamId, timeAccuracy, initial
           <ReportStructurePanel jathakamId={jathakam.id} language={language} />
         </Card>
 
+        <Card icon="picture_as_pdf" title={t.pdfTitle}>
+          <PdfDownloadButton jathakamId={jathakam.id} language={language} />
+        </Card>
+
         <p className="font-body-sm text-body-sm text-on-surface-variant">{t.fullChartNote}</p>
       </div>
     </div>

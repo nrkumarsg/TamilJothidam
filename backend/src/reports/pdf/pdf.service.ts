@@ -10,6 +10,7 @@ import { ReportService } from '../report.service';
 import { buildReportHtml } from './report-template';
 import { renderHtmlToPdf } from './pdf-renderer';
 import { UsageLogService } from '../../logging/usage-log.service';
+import { EmailService } from '../../auth/email.service';
 
 // Regenerable from already-persisted DB data, not source — see .gitignore.
 const OUTPUT_DIR = path.join(__dirname, '..', '..', '..', 'generated-reports');
@@ -29,6 +30,7 @@ export class PdfService {
     private readonly transitsService: TransitsService,
     private readonly reportService: ReportService,
     private readonly usageLog: UsageLogService,
+    private readonly emailService: EmailService,
   ) {}
 
   async generate(jathakamId: string, language: Language): Promise<Report> {
@@ -67,6 +69,20 @@ export class PdfService {
       });
       throw err;
     }
+  }
+
+  // Always regenerates first (like generate() itself says: "regenerating
+  // overwrites") so the emailed PDF reflects whatever AI interpretations
+  // have been generated since the last PDF, rather than a possibly-stale
+  // cached file.
+  async emailToUser(jathakamId: string, language: Language, toEmail: string): Promise<void> {
+    const report = await this.generate(jathakamId, language);
+    const pdfBuffer = fs.readFileSync(report.pdfPath!);
+    await this.emailService.sendPdfReportEmail(
+      toEmail,
+      { filename: `jathakam-${jathakamId}-${language}.pdf`, contentBase64: pdfBuffer.toString('base64') },
+      language === 'TA' ? 'ta' : 'en',
+    );
   }
 
   async getExisting(jathakamId: string, language: Language): Promise<Report> {

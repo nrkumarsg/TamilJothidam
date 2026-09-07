@@ -457,6 +457,23 @@ export async function listQuestions(jathakamId: string): Promise<AiQuestion[]> {
   return parseJsonOrThrow(res);
 }
 
+// Re-answers an already-asked question in a different language WITHOUT
+// saving a new row — used only to re-display an existing entry when the
+// user toggles the panel's language, so switching back and forth doesn't
+// fill the history with duplicate rows.
+export async function translateQuestion(
+  jathakamId: string,
+  question: string,
+  language: PredictionLanguage,
+): Promise<AiQuestion> {
+  const res = await authFetch(`${API_BASE_URL}/jathakams/${jathakamId}/ask/translate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, language }),
+  });
+  return parseJsonOrThrow(res);
+}
+
 // Mirrors backend/src/i18n/glossary.ts (Phase 14).
 export interface Glossary {
   defaultLocale: 'ta' | 'en';
@@ -506,6 +523,13 @@ export interface PdfReportMeta {
 
 export async function generatePdfReport(jathakamId: string, language: PredictionLanguage): Promise<PdfReportMeta> {
   const res = await authFetch(`${API_BASE_URL}/jathakams/${jathakamId}/report/pdf?language=${language}`, {
+    method: 'POST',
+  });
+  return parseJsonOrThrow(res);
+}
+
+export async function emailPdfReport(jathakamId: string, language: PredictionLanguage): Promise<{ message: string }> {
+  const res = await authFetch(`${API_BASE_URL}/jathakams/${jathakamId}/report/pdf/email?language=${language}`, {
     method: 'POST',
   });
   return parseJsonOrThrow(res);

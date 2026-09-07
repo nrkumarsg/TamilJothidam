@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { generatePdfReport, pdfDownloadUrl } from '@/lib/api';
+import { emailPdfReport, generatePdfReport, pdfDownloadUrl } from '@/lib/api';
 import { labels, WizardLanguage } from './labels';
 
 interface Props {
@@ -22,6 +22,9 @@ export function PdfDownloadButton({ language, jathakamId, variant = 'button' }: 
   const apiLanguage = language === 'ta' ? 'TA' : 'EN';
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailing, setEmailing] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   async function handleDownload() {
     setGenerating(true);
@@ -33,6 +36,20 @@ export function PdfDownloadButton({ language, jathakamId, variant = 'button' }: 
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handleEmail() {
+    setEmailing(true);
+    setEmailError(null);
+    setEmailSent(false);
+    try {
+      await emailPdfReport(jathakamId, apiLanguage);
+      setEmailSent(true);
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setEmailing(false);
     }
   }
 
@@ -61,14 +78,30 @@ export function PdfDownloadButton({ language, jathakamId, variant = 'button' }: 
         </p>
       )}
       {generating && <p className="text-on-surface-variant font-body-sm text-body-sm m-0">{t.pdfGenerating}</p>}
-      <button
-        className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
-        disabled={generating}
-        type="button"
-        onClick={handleDownload}
-      >
-        {t.pdfDownloadButton}
-      </button>
+      {emailError && (
+        <p className="text-error font-body-sm text-body-sm m-0">
+          {t.error}: {emailError}
+        </p>
+      )}
+      <div className="flex gap-space-xs">
+        <button
+          className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
+          disabled={generating}
+          type="button"
+          onClick={handleDownload}
+        >
+          {t.pdfDownloadButton}
+        </button>
+        <button
+          className="px-space-md py-space-xs rounded-lg border border-outline-variant bg-surface-container-lowest text-primary font-label-md text-label-md disabled:opacity-60 flex items-center gap-space-2xs"
+          disabled={emailing}
+          type="button"
+          onClick={handleEmail}
+        >
+          <span className="material-symbols-outlined text-[16px]">{emailSent ? 'check' : 'mail'}</span>
+          {emailing ? t.pdfEmailSending : emailSent ? t.pdfEmailSent : t.pdfEmailButton}
+        </button>
+      </div>
     </div>
   );
 }

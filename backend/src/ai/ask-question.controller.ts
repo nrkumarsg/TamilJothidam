@@ -21,4 +21,14 @@ export class AskQuestionController {
   list(@Param('id') id: string) {
     return this.askQuestionService.listForJathakam(id);
   }
+
+  // POST /jathakams/:id/ask/translate {question, language} — re-answers an
+  // already-asked question in a different display language WITHOUT saving
+  // a new row (see AskQuestionService.translate). Used only when the user
+  // toggles the panel's language after an answer already exists in the
+  // other one.
+  @Post(':id/ask/translate')
+  translate(@Param('id') id: string, @Body() dto: AskQuestionDto) {
+    return this.askQuestionService.translate(id, dto.question, dto.language);
+  }
 }

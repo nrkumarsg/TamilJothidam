@@ -1,9 +1,11 @@
 import * as fs from 'fs';
-import { BadRequestException, Controller, Get, Header, Param, Post, Query, StreamableFile, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Header, HttpCode, Param, Post, Query, StreamableFile, UseGuards } from '@nestjs/common';
 import { Language } from '@prisma/client';
 import { PdfService } from './pdf.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { JathakamOwnershipGuard } from '../../auth/jathakam-ownership.guard';
+import { CurrentUser } from '../../auth/current-user.decorator';
+import { JwtPayload } from '../../auth/jwt-payload.type';
 
 const VALID_LANGUAGES = Object.values(Language);
 
@@ -32,6 +34,21 @@ export class PdfController {
       generatedAt: report.generatedAt,
       downloadUrl: `/jathakams/${id}/report/pdf?language=${report.language}`,
     };
+  }
+
+  // POST /jathakams/:id/report/pdf/email?language=TA — (re)generates the
+  // PDF and emails it as an attachment to the logged-in user's own email
+  // (the JWT's email claim — never a caller-supplied address, so this
+  // can't be used to spam a third party's inbox).
+  @HttpCode(200)
+  @Post(':id/report/pdf/email')
+  async email(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+    @Query('language') language: string = 'TA',
+  ) {
+    await this.pdfService.emailToUser(id, validateLanguage(language), user.email);
+    return { message: `Report emailed to ${user.email}` };
   }
 
   // GET /jathakams/:id/report/pdf?language=TA — downloads the most
