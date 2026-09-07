@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { GoogleAuthService } from './google-auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser } from './current-user.decorator';
 import { JwtPayload } from './jwt-payload.type';
@@ -25,6 +27,22 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  // Always 200 with the same generic body regardless of whether the email
+  // exists — see AuthService.forgotPassword's comment.
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto.email, dto.language);
+    return { message: 'If that email is registered, a reset link has been sent.' };
+  }
+
+  @HttpCode(200)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { message: 'Password updated.' };
   }
 
   // GET, not POST — this is a full-page browser redirect to Google's

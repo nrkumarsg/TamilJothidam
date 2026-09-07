@@ -3,6 +3,7 @@ import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { GoogleAuthService } from './google-auth.service';
+import { EmailService } from './email.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JathakamOwnershipGuard } from './jathakam-ownership.guard';
 
@@ -14,7 +15,7 @@ import { JathakamOwnershipGuard } from './jathakam-ownership.guard';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleAuthService, JwtAuthGuard, JathakamOwnershipGuard],
+  providers: [AuthService, GoogleAuthService, EmailService, JwtAuthGuard, JathakamOwnershipGuard],
   exports: [JwtModule, AuthService, JwtAuthGuard, JathakamOwnershipGuard],
 })
 export class AuthModule {}

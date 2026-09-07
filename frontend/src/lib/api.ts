@@ -234,6 +234,24 @@ export async function login(email: string, password: string): Promise<AuthResult
   return parseJsonOrThrow(res);
 }
 
+export async function forgotPassword(email: string, language: 'ta' | 'en'): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, language }),
+  });
+  await parseJsonOrThrow(res);
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  await parseJsonOrThrow(res);
+}
+
 export async function deleteAccount(): Promise<void> {
   const res = await authFetch(`${API_BASE_URL}/auth/me`, { method: 'DELETE' });
   if (!res.ok) {

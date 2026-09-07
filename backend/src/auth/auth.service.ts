@@ -1,12 +1,19 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtPayload } from './jwt-payload.type';
 import { GoogleProfile } from './google-auth.service';
+import { EmailService } from './email.service';
 
 const SALT_ROUNDS = 10;
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 export interface AuthResult {
   accessToken: string;
@@ -25,6 +32,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly email: EmailService,
   ) {}
 
   async register(email: string, password: string): Promise<AuthResult> {
@@ -62,6 +70,45 @@ export class AuthService {
         : await this.prisma.user.create({ data: { email: profile.email, googleId: profile.googleId } });
     }
     return this.buildAuthResult(user);
+  }
+
+  // Always resolves — never reveals whether the email belongs to an
+  // account (same "one answer either way" principle as login()'s shared
+  // error message). A Google-only account (no passwordHash) still gets a
+  // token here deliberately: resetting sets a password, letting that
+  // account additionally sign in with email/password from then on, which
+  // is a reasonable recovery path rather than a dead end.
+  async forgotPassword(email: string, language: 'ta' | 'en' = 'ta'): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return;
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(rawToken),
+        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+      },
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+    const resetLink = `${frontendUrl}/reset-password?token=${rawToken}`;
+    await this.email.sendPasswordResetEmail(user.email, resetLink, language);
+  }
+
+  async resetPassword(rawToken: string, newPassword: string): Promise<void> {
+    const tokenHash = hashToken(rawToken);
+    const record = await this.prisma.passwordResetToken.findUnique({ where: { tokenHash } });
+
+    if (!record || record.usedAt || record.expiresAt < new Date()) {
+      throw new BadRequestException('This password reset link is invalid or has expired');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
+      this.prisma.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+    ]);
   }
 
   async deleteAccount(userId: string): Promise<void> {

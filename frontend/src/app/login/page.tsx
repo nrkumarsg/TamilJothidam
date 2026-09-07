@@ -25,6 +25,7 @@ const labels = {
     googleButton: 'Google மூலம் உள்நுழைக',
     orDivider: 'அல்லது',
     googleOauthError: 'Google உள்நுழைவு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.',
+    forgotPassword: 'கடவுச்சொல் மறந்துவிட்டதா?',
   },
   en: {
     title: 'Tamil Jathakam',
@@ -41,6 +42,7 @@ const labels = {
     googleButton: 'Sign in with Google',
     orDivider: 'or',
     googleOauthError: 'Google sign-in failed. Please try again.',
+    forgotPassword: 'Forgot password?',
   },
 } as const;
 
@@ -129,6 +131,12 @@ function LoginPageInner() {
               <span style={{ fontSize: '0.75rem', color: '#999' }}>{t.passwordHint}</span>
             )}
           </label>
+
+          {mode === 'login' && (
+            <Link href={`/forgot-password?lang=${language}`} style={{ fontSize: '0.85rem', alignSelf: 'flex-end' }}>
+              {t.forgotPassword}
+            </Link>
+          )}
 
           {error && (
             <p style={{ color: '#c0392b', fontSize: '0.85rem', margin: 0 }}>
