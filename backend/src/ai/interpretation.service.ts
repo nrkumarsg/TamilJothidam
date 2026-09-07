@@ -121,6 +121,9 @@ export class InterpretationService {
     try {
       result = await provider.generate({ systemPrompt, userPrompt });
     } catch (err) {
+      // provider.id is the fallback chain's PRIMARY id here — every
+      // provider in the chain already failed by the time this throws (see
+      // FallbackAiProvider), so there is no "actual" provider to report.
       await this.usageLog.log('ERROR', {
         jathakamId,
         aiProvider: provider.id,
@@ -129,9 +132,14 @@ export class InterpretationService {
       throw err;
     }
 
+    // result.providerId is set when a fallback chain served this via a
+    // provider other than the primary — that's what actually ran, and what
+    // Prediction.aiProvider / the usage log must reflect.
+    const servedBy = result.providerId ?? provider.id;
+
     await this.usageLog.log('PREDICTION_GENERATED', {
       jathakamId,
-      aiProvider: provider.id,
+      aiProvider: servedBy,
       aiModel: result.model,
       inputTokens: result.usage?.inputTokens,
       outputTokens: result.usage?.outputTokens,
@@ -148,14 +156,14 @@ export class InterpretationService {
         language,
         text: result.text,
         confidence,
-        aiProvider: provider.id,
+        aiProvider: servedBy,
         aiModel: result.model,
         promptVersion,
       },
       update: {
         text: result.text,
         confidence,
-        aiProvider: provider.id,
+        aiProvider: servedBy,
         aiModel: result.model,
         promptVersion,
       },

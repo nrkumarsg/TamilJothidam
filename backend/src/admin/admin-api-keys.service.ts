@@ -10,7 +10,7 @@ export interface ApiKeyStatus {
   updatedAt: Date | null;
 }
 
-const ALL_PROVIDERS: AIProviderId[] = ['ANTHROPIC', 'OPENAI', 'GEMINI', 'NVIDIA_NIM', 'OLLAMA'];
+const ALL_PROVIDERS: AIProviderId[] = ['ANTHROPIC', 'OPENAI', 'GEMINI', 'NVIDIA_NIM', 'OLLAMA', 'DEEPSEEK'];
 
 // Spec §35 "Manage API keys", §41 "Secure API key storage". Keys are
 // encrypted at rest (crypto.util.ts) and never returned in plaintext by

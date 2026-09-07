@@ -79,10 +79,11 @@ export class AdminCatalogService {
 
     return [
       { id: 'ANTHROPIC', implemented: true },
+      { id: 'DEEPSEEK', implemented: true },
+      { id: 'OLLAMA', implemented: true },
       { id: 'OPENAI', implemented: false },
       { id: 'GEMINI', implemented: false },
       { id: 'NVIDIA_NIM', implemented: false },
-      { id: 'OLLAMA', implemented: false },
     ].map((p) => ({
       ...p,
       active: p.id === activeProvider,

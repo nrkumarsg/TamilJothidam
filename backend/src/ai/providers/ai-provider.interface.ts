@@ -10,6 +10,10 @@ export interface AIGenerateOutput {
   text: string;
   model: string;
   usage?: { inputTokens: number; outputTokens: number };
+  // Which provider actually produced this — only set by FallbackAiProvider,
+  // when it differs from whichever provider .generate() was called on.
+  // Callers should use `result.providerId ?? provider.id` when logging.
+  providerId?: AIProviderId;
 }
 
 // Provider abstraction (spec §32) — the interpretation service never talks

@@ -298,7 +298,7 @@ function ReportsTab() {
   );
 }
 
-const PROVIDERS = ['ANTHROPIC', 'OPENAI', 'GEMINI', 'NVIDIA_NIM', 'OLLAMA'];
+const PROVIDERS = ['ANTHROPIC', 'DEEPSEEK', 'OPENAI', 'GEMINI', 'NVIDIA_NIM', 'OLLAMA'];
 
 function ApiKeysTab() {
   const [keys, setKeys] = useState<ApiKeyStatus[] | null>(null);

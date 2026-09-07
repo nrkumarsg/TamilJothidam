@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "AIProviderId" ADD VALUE 'DEEPSEEK';

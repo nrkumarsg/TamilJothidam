@@ -24,10 +24,14 @@ provider abstraction.
    `backend/prompts/{tamil,english}/<section>.md`. Files are cached in memory
    after the first read.
 4. `AiProviderRegistry.getProvider()` selects the active `AIProvider` (an
-   explicit id, or `AI_DEFAULT_PROVIDER` env var, defaulting to Anthropic).
-   Only `AnthropicProvider` is a real implementation; OpenAI/Gemini/NVIDIA
-   NIM/Ollama are named (spec §32) but return `NotImplementedException` via
-   `unimplementedProvider()` until built.
+   explicit id, or `AI_DEFAULT_PROVIDER` env var, defaulting to Anthropic) —
+   wrapped in a `FallbackAiProvider` chain with `AI_FALLBACK_PROVIDERS`
+   (default `ANTHROPIC,OLLAMA`) so a down or unconfigured primary doesn't
+   fail the whole request. `AnthropicProvider`, `DeepSeekProvider`, and
+   `OllamaProvider` are real implementations; OpenAI/Gemini/NVIDIA NIM are
+   still named (spec §32) but return `NotImplementedException` via
+   `unimplementedProvider()` until built. See
+   `backend/src/ai/providers/README.md` for the fallback design.
 5. The provider's response is persisted via `prisma.prediction.upsert()`,
    tagged with a confidence level (`confidenceFromTimeAccuracy` —
    documented simplification: only birth-time accuracy feeds this today, not
