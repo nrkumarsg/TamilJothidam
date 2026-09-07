@@ -14,16 +14,16 @@ sections by what already exists from earlier phases:
   exists," the frontend keeps rendering it with the existing panels
   (`SouthIndianChart`, `HouseAnalysisTable`, `YogaPanel`, `DoshaPanel`,
   `DashaPanel`, `TransitPanel`).
-- **`ai_pending` / `ai_generated`** (7 sections) — summary, health, wealth,
+- **`ai_pending` / `ai_generated`** (23 sections) — summary, health, wealth,
   career, marriage, spirituality (mapped to Phase 13's `karma` prediction
-  section), future_life (mapped to `future`). Carries the cached
-  `Prediction` row if one has been generated yet, `null` otherwise.
-- **`unavailable`** (16 sections) — business, family, children, education,
+  section), future_life (mapped to `future`), plus the 16 that closed out
+  the full 34-section structure: business, family, children, education,
   foreign_travel, property, the four favorable_* sections, remedies,
-  life_timeline, past_life, present_life, graha_phalan, final_summary. No
-  engine or AI prompt covers these yet — reported honestly rather than
-  omitted, so the frontend can show a real 34-row table of contents even
-  though 16 rows currently say "coming soon."
+  life_timeline, past_life, present_life, graha_phalan, final_summary.
+  Carries the cached `Prediction` row if one has been generated yet, `null`
+  otherwise. `unavailable` remains a possible status (see
+  `report.types.ts`) but nothing currently produces it — all 34 sections
+  resolve to either `chart_data` or an AI prediction section.
 
 ## Palan period (Phase 15, user-requested addition)
 

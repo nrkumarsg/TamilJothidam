@@ -39,12 +39,26 @@ provider abstraction.
    model name, and prompt version (`ASTROLOGY_PROMPT_VERSION` env var,
    default `1.0`).
 
-## The 7 initial sections
+## The 23 AI-generated sections
 
-`prediction.types.ts` defines `PREDICTION_SECTIONS`: `basic_reading`,
-`health`, `wealth`, `career`, `marriage`, `karma`, `future` — the initial
-working set proving the pipeline end-to-end. Phase 15 (full report
-generator) will assemble the complete 34-section report from spec §33.
+`prediction.types.ts` defines `PREDICTION_SECTIONS`: the original 7
+(`basic_reading`, `health`, `wealth`, `career`, `marriage`, `karma`,
+`future`) that proved the pipeline end-to-end, plus 16 more
+(`graha_phalan`, `past_life`, `present_life`, `business`, `family`,
+`children`, `education`, `foreign_travel`, `property`,
+`favorable_periods`, `favorable_days`, `favorable_colors`,
+`favorable_numbers`, `remedies`, `life_timeline`, `final_summary`) that
+close out the full 34-section report from spec §33/§28 — the remaining 11
+slugs are deterministic chart data (lagna, houses, dasha, transits, ...)
+served directly from earlier phases' own endpoints, never AI-generated.
+Every section follows the same prompt shape as the original 7: cite the
+specific houses/planets it draws from, present findings as hedged trends
+(never certainties), and end with a "strictly avoid" line — see
+`backend/prompts/README.md` and any individual prompt file for the exact
+pattern. The riskiest of the 16 — `past_life` (karmic/past-life content)
+and `remedies` (traditional remedies) — lean on `system.md`'s existing
+non-negotiable rules 13 and 10-12 respectively rather than inventing new
+safety rules per section.
 
 ## Retrieval
 

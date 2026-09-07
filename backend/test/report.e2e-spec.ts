@@ -129,14 +129,26 @@ describe('Report (e2e)', () => {
     expect(healthAfter.prediction.text).toBe('FAKE REPORT TEXT');
   });
 
-  it('marks sections with no engine or prompt behind them yet as unavailable', async () => {
+  it('marks the 16 later-added sections as ai_pending, same as the original 7', async () => {
     const res = await request(app.getHttpServer())
       .get(`/jathakams/${jathakamId}/report`)
       .set(...authHeader(auth))
       .expect(200);
     for (const slug of ['business', 'family', 'children', 'remedies', 'final_summary', 'graha_phalan']) {
       const section = res.body.sections.find((s: { slug: string }) => s.slug === slug);
-      expect(section.status).toBe('unavailable');
+      expect(section.status).toBe('ai_pending');
+      expect(section.prediction).toBeNull();
+    }
+  });
+
+  it('has no section left as unavailable — all 34 resolve to chart_data or an AI section', async () => {
+    const res = await request(app.getHttpServer())
+      .get(`/jathakams/${jathakamId}/report`)
+      .set(...authHeader(auth))
+      .expect(200);
+    expect(res.body.sections).toHaveLength(34);
+    for (const section of res.body.sections as { status: string }[]) {
+      expect(section.status).not.toBe('unavailable');
     }
   });
 

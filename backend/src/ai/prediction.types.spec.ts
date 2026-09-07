@@ -1,7 +1,7 @@
 import { PREDICTION_SECTIONS, confidenceFromTimeAccuracy, isPredictionSection } from './prediction.types';
 
 describe('prediction.types', () => {
-  it('has exactly the 7 spec §33 initial sections', () => {
+  it('has the original 7 spec §33 sections plus the 16 that complete the 34-section report', () => {
     expect(PREDICTION_SECTIONS).toEqual([
       'basic_reading',
       'health',
@@ -10,6 +10,22 @@ describe('prediction.types', () => {
       'marriage',
       'karma',
       'future',
+      'graha_phalan',
+      'past_life',
+      'present_life',
+      'business',
+      'family',
+      'children',
+      'education',
+      'foreign_travel',
+      'property',
+      'favorable_periods',
+      'favorable_days',
+      'favorable_colors',
+      'favorable_numbers',
+      'remedies',
+      'life_timeline',
+      'final_summary',
     ]);
   });
 

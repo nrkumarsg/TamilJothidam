@@ -11,12 +11,12 @@ import { AI_SECTION_BY_SLUG, CHART_DATA_SLUGS, FullReport, ReportSectionEntry } 
 // does not generate AI text itself (that stays owned by
 // InterpretationService); it only classifies each of the 34 sections by
 // what's available today and attaches any already-cached AI prediction.
-// 16 of the 34 sections have no engine or prompt behind them yet (business,
-// family, children, education, foreign_travel, property, the four
-// favorable_* sections, remedies, life_timeline, past_life, present_life,
-// graha_phalan, final_summary) — reported honestly as 'unavailable' rather
-// than silently omitted, so the frontend can show a real table of contents
-// for the eventual full 34-section report.
+// All 34 sections now resolve to either 'chart_data' or an AI prediction
+// section — 11 chart-data slugs (CHART_DATA_SLUGS) plus 23 AI-generated
+// ones (AI_SECTION_BY_SLUG). 'unavailable' is kept as a status for
+// forward-compatibility (a slug added to REPORT_SECTIONS without a
+// matching entry in either map degrades to it, rather than crashing), but
+// nothing currently produces it.
 @Injectable()
 export class ReportService {
   constructor(

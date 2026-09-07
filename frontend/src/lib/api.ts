@@ -326,7 +326,7 @@ export async function getTransits(jathakamId: string, asOf?: string): Promise<Tr
   return parseJsonOrThrow(res);
 }
 
-// Mirrors backend/src/ai/prediction.types.ts PREDICTION_SECTIONS (Phase 13).
+// Mirrors backend/src/ai/prediction.types.ts PREDICTION_SECTIONS.
 export const PREDICTION_SECTIONS = [
   'basic_reading',
   'health',
@@ -335,6 +335,22 @@ export const PREDICTION_SECTIONS = [
   'marriage',
   'karma',
   'future',
+  'graha_phalan',
+  'past_life',
+  'present_life',
+  'business',
+  'family',
+  'children',
+  'education',
+  'foreign_travel',
+  'property',
+  'favorable_periods',
+  'favorable_days',
+  'favorable_colors',
+  'favorable_numbers',
+  'remedies',
+  'life_timeline',
+  'final_summary',
 ] as const;
 
 export type PredictionSection = (typeof PREDICTION_SECTIONS)[number];

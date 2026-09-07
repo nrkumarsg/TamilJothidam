@@ -24,11 +24,12 @@ export const CHART_DATA_SLUGS: ReadonlySet<string> = new Set([
   'transit_results',
 ]);
 
-// Which report slugs map to an already-built AI prediction section (Phase
-// 13). Not every slug has an exact 1:1 spec match — 'karma' and 'future'
-// are close-but-not-identical to 'spirituality' (27) and 'future_life'
-// (16) and are mapped here anyway since they are the closest existing
-// content, documented rather than silently assumed.
+// Which report slugs map to an already-built AI prediction section. Not
+// every slug has an exact 1:1 spec match — 'karma' and 'future' are
+// close-but-not-identical to 'spirituality' (27) and 'future_life' (16)
+// and are mapped here anyway since they are the closest existing content,
+// documented rather than silently assumed. Every other slug below matches
+// its PredictionSection name exactly.
 export const AI_SECTION_BY_SLUG: Readonly<Partial<Record<string, PredictionSection>>> = {
   summary: 'basic_reading',
   health: 'health',
@@ -37,6 +38,22 @@ export const AI_SECTION_BY_SLUG: Readonly<Partial<Record<string, PredictionSecti
   marriage: 'marriage',
   spirituality: 'karma',
   future_life: 'future',
+  graha_phalan: 'graha_phalan',
+  past_life: 'past_life',
+  present_life: 'present_life',
+  business: 'business',
+  family: 'family',
+  children: 'children',
+  education: 'education',
+  foreign_travel: 'foreign_travel',
+  property: 'property',
+  favorable_periods: 'favorable_periods',
+  favorable_days: 'favorable_days',
+  favorable_colors: 'favorable_colors',
+  favorable_numbers: 'favorable_numbers',
+  remedies: 'remedies',
+  life_timeline: 'life_timeline',
+  final_summary: 'final_summary',
 };
 
 export type ReportSectionStatus = 'chart_data' | 'ai_generated' | 'ai_pending' | 'unavailable';
