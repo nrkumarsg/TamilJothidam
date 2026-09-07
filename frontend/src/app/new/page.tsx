@@ -4,28 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { isLoggedIn } from '@/lib/auth';
-import {
-  BirthTimeAccuracy,
-  createBirthProfile,
-  createJathakam,
-  DashaSummary,
-  Gender,
-  getDasha,
-  getTransits,
-  JathakamSummary,
-  TransitSummary,
-} from '@/lib/api';
+import { BirthTimeAccuracy, createBirthProfile, createJathakam, Gender, JathakamSummary } from '@/lib/api';
 import { labels, WizardLanguage } from './labels';
 import { emptyLocation, LocationState, PlaceSearch } from './PlaceSearch';
-import { SouthIndianChart } from '@/components/chart/SouthIndianChart';
-import { HouseAnalysisTable } from './HouseAnalysisTable';
-import { DashaPanel } from './DashaPanel';
-import { TransitPanel } from './TransitPanel';
-import { YogaPanel } from './YogaPanel';
-import { DoshaPanel } from './DoshaPanel';
-import { PredictionPanel } from './PredictionPanel';
-import { ReportStructurePanel } from './ReportStructurePanel';
-import { PdfDownloadButton } from './PdfDownloadButton';
+import { JathakamDetailView } from './JathakamDetailView';
 
 interface FormState {
   name: string;
@@ -57,10 +39,6 @@ export default function NewJathakamPage() {
   const [jathakam, setJathakam] = useState<JathakamSummary | null>(null);
   const [computingChart, setComputingChart] = useState(false);
   const [chartError, setChartError] = useState<string | null>(null);
-  const [dasha, setDasha] = useState<DashaSummary | null>(null);
-  const [dashaError, setDashaError] = useState<string | null>(null);
-  const [transits, setTransits] = useState<TransitSummary | null>(null);
-  const [transitsError, setTransitsError] = useState<string | null>(null);
 
   const t = labels[language];
 
@@ -114,18 +92,6 @@ export default function NewJathakamPage() {
       try {
         const chart = await createJathakam(profile.id);
         setJathakam(chart);
-        try {
-          const dashaSummary = await getDasha(chart.id);
-          setDasha(dashaSummary);
-        } catch (err) {
-          setDashaError(err instanceof Error ? err.message : String(err));
-        }
-        try {
-          const transitSummary = await getTransits(chart.id);
-          setTransits(transitSummary);
-        } catch (err) {
-          setTransitsError(err instanceof Error ? err.message : String(err));
-        }
       } catch (err) {
         setChartError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -140,8 +106,6 @@ export default function NewJathakamPage() {
   if (!authChecked) return null;
 
   if (createdId) {
-    const showAccuracyWarning = form.timeAccuracy === 'UNKNOWN' || form.timeAccuracy === 'WITHIN_30_MIN';
-
     return (
       <main style={pageStyle}>
         <div style={cardStyle}>
@@ -155,103 +119,13 @@ export default function NewJathakamPage() {
             </p>
           )}
 
-          {jathakam && jathakam.lagna && jathakam.rasi && (
-            <div style={selectedBoxStyle}>
-              <h2 style={{ margin: 0, fontSize: '1.1rem' }}>{t.resultsTitle}</h2>
-
-              {showAccuracyWarning && <p style={warningStyle}>{t.missingBirthTimeWarning}</p>}
-
-              {(() => {
-                const planetFlags = Object.fromEntries(
-                  jathakam.planets.map((p) => [p.graha, { retrograde: p.retrograde, combust: p.combust }]),
-                );
-                return (
-                  <>
-                    <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.rasiChartTitle}</h3>
-                    <SouthIndianChart
-                      lagnaSignIndex={jathakam.lagna!.signIndex}
-                      houses={jathakam.houses}
-                      planetFlags={planetFlags}
-                      language={language}
-                      centerLabel={language === 'ta' ? 'ராசி' : 'Rasi'}
-                    />
-
-                    {jathakam.navamsa && (
-                      <>
-                        <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>
-                          {t.navamsaChartTitle}
-                        </h3>
-                        <SouthIndianChart
-                          lagnaSignIndex={jathakam.navamsa.lagnaSignIndex}
-                          houses={jathakam.navamsa.houses}
-                          planetFlags={planetFlags}
-                          language={language}
-                          centerLabel={language === 'ta' ? 'நவாம்சம்' : 'Navamsa'}
-                        />
-                      </>
-                    )}
-                  </>
-                );
-              })()}
-
-              <div>
-                <strong>{t.lagnaLabel}:</strong>{' '}
-                {language === 'ta' ? jathakam.lagna.signName.ta : jathakam.lagna.signName.en} (
-                {jathakam.lagna.degreeInSign.toFixed(2)}° {t.degreeLabel})
-              </div>
-              <div>
-                <strong>{t.rasiLabel}:</strong>{' '}
-                {language === 'ta' ? jathakam.rasi.signName.ta : jathakam.rasi.signName.en}
-              </div>
-              <div>
-                <strong>{t.nakshatraLabel}:</strong>{' '}
-                {language === 'ta' ? jathakam.rasi.nakshatraName.ta : jathakam.rasi.nakshatraName.en} —{' '}
-                {t.padaLabel} {jathakam.rasi.pada}
-              </div>
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>
-                {t.houseAnalysisTitle}
-              </h3>
-              <HouseAnalysisTable language={language} houseAnalysis={jathakam.houseAnalysis} />
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.yogaTitle}</h3>
-              <YogaPanel language={language} yogas={jathakam.yogas} />
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.doshaTitle}</h3>
-              <DoshaPanel language={language} doshas={jathakam.doshas} />
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.dashaTitle}</h3>
-              {dashaError && (
-                <p style={{ color: '#c0392b' }}>
-                  {t.error}: {dashaError}
-                </p>
-              )}
-              {dasha && <DashaPanel language={language} dasha={dasha} />}
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.transitTitle}</h3>
-              {transitsError && (
-                <p style={{ color: '#c0392b' }}>
-                  {t.error}: {transitsError}
-                </p>
-              )}
-              {transits && <TransitPanel language={language} transits={transits} />}
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.predictionTitle}</h3>
-              <PredictionPanel
-                language={language}
-                jathakamId={jathakam.id}
-                initialPredictions={[]}
-                mahadashaList={dasha?.mahadashaList ?? []}
-              />
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.reportStructureTitle}</h3>
-              <ReportStructurePanel language={language} jathakamId={jathakam.id} />
-
-              <h3 style={{ margin: '0.5rem 0 0', fontSize: '0.95rem', color: '#555' }}>{t.pdfTitle}</h3>
-              <PdfDownloadButton language={language} jathakamId={jathakam.id} />
-
-              <p style={{ ...warningStyle, color: '#666' }}>{t.fullChartNote}</p>
-            </div>
+          {jathakam && (
+            <JathakamDetailView
+              language={language}
+              jathakamId={jathakam.id}
+              timeAccuracy={form.timeAccuracy}
+              initialJathakam={jathakam}
+            />
           )}
 
           <p style={{ fontSize: '0.85rem', color: '#999' }}>ID: {createdId}</p>
@@ -263,17 +137,15 @@ export default function NewJathakamPage() {
               setCreatedId(null);
               setJathakam(null);
               setChartError(null);
-              setDasha(null);
-              setDashaError(null);
-              setTransits(null);
-              setTransitsError(null);
               setStep(1);
             }}
           >
             {t.createAnother}
           </button>
           <p>
-            <Link href="/">← {language === 'ta' ? 'முகப்புக்குத் திரும்பு' : 'Back to home'}</Link>
+            <Link href="/jathakams">{language === 'ta' ? 'எனது ஜாதகங்கள்' : 'My Charts'}</Link>
+            {' · '}
+            <Link href="/">← {t.backToDashboard}</Link>
           </p>
         </div>
       </main>

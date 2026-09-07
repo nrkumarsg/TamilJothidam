@@ -51,9 +51,30 @@ export interface CreateBirthProfilePayload {
   };
 }
 
-export interface BirthProfile extends CreateBirthProfilePayload {
+// The actual shape returned by the backend (backend/src/profiles/profiles.service.ts)
+// — the relation is named `birthLocation`, not `location` like the create
+// payload's field. dateOfBirth comes back as a full ISO datetime string
+// (Prisma serializes its Date-only column that way over JSON), not the
+// plain "YYYY-MM-DD" the create payload sends.
+export interface BirthProfile {
   id: string;
+  userId: string;
+  name: string;
+  gender: Gender;
+  dateOfBirth: string;
+  timeOfBirth: string;
+  timeAccuracy: BirthTimeAccuracy;
   createdAt: string;
+  birthLocation: {
+    placeName: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    utcOffsetMinutes: number;
+    dstApplicable: boolean;
+    manuallyCorrected: boolean;
+  };
 }
 
 export interface BilingualLabel {
@@ -267,6 +288,29 @@ export async function createJathakam(profileId: string): Promise<JathakamSummary
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ profileId }),
   });
+  return parseJsonOrThrow(res);
+}
+
+export async function getJathakam(jathakamId: string): Promise<JathakamSummary> {
+  const res = await authFetch(`${API_BASE_URL}/jathakams/${jathakamId}`);
+  return parseJsonOrThrow(res);
+}
+
+// Mirrors backend/src/jathakam/jathakam.service.ts's findForProfile — a
+// profile could in principle have more than one jathakam, ordered newest
+// first; the "My Charts" list only ever shows the most recent one.
+export async function listJathakamsForProfile(profileId: string): Promise<JathakamSummary[]> {
+  const res = await authFetch(`${API_BASE_URL}/jathakams/profile/${profileId}`);
+  return parseJsonOrThrow(res);
+}
+
+export async function listProfiles(): Promise<BirthProfile[]> {
+  const res = await authFetch(`${API_BASE_URL}/profiles`);
+  return parseJsonOrThrow(res);
+}
+
+export async function getProfile(profileId: string): Promise<BirthProfile> {
+  const res = await authFetch(`${API_BASE_URL}/profiles/${profileId}`);
   return parseJsonOrThrow(res);
 }
 

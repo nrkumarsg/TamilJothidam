@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { clearSession, getStoredUser, StoredUser } from '@/lib/auth';
 
-// Minimal dashboard shell (spec §39). Only "புதிய ஜாதகம் உருவாக்கு" is wired
-// up (Phase 3); the rest need generated data (Phase 15+) before they have
-// anything to show. Auth (Phase 17) gates entry to this page.
+// Minimal dashboard shell (spec §39). "புதிய ஜாதகம் உருவாக்கு" (create) and
+// "எனது ஜாதகங்கள்" (my charts, /jathakams) are wired up; "அறிக்கைகள்"
+// (reports) and "அமைப்புகள்" (settings) still need dedicated pages. Auth
+// (Phase 17) gates entry to this page.
 export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<StoredUser | null>(null);
@@ -60,7 +61,9 @@ export default function HomePage() {
         <Link href="/new" style={primaryLinkStyle}>
           புதிய ஜாதகம் உருவாக்கு
         </Link>
-        <span style={disabledLinkStyle}>எனது ஜாதகங்கள்</span>
+        <Link href="/jathakams" style={secondaryLinkStyle}>
+          எனது ஜாதகங்கள்
+        </Link>
         <span style={disabledLinkStyle}>அறிக்கைகள்</span>
         <span style={disabledLinkStyle}>அமைப்புகள்</span>
         {user?.role === 'ADMIN' && (
@@ -85,6 +88,16 @@ const primaryLinkStyle: React.CSSProperties = {
   borderRadius: '6px',
   background: '#111',
   color: 'white',
+  textDecoration: 'none',
+  fontSize: '1rem',
+};
+
+const secondaryLinkStyle: React.CSSProperties = {
+  padding: '0.75rem 1rem',
+  borderRadius: '6px',
+  background: 'white',
+  border: '1px solid #111',
+  color: '#111',
   textDecoration: 'none',
   fontSize: '1rem',
 };
