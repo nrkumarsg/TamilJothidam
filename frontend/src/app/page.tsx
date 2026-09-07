@@ -35,12 +35,14 @@ export default function HomePage() {
       <AppHeader
         language={language}
         showBack={false}
-        title={language === 'ta' ? 'தமிழ் ஜாதகம்' : 'Tamil Jathakam'}
+        title={language === 'ta' ? 'தமிழ் ஜோதிடம்' : 'Tamil Jothidam'}
         onLanguageChange={setLanguage}
       />
 
       <div className="flex-1 flex flex-col items-center justify-center px-margin-mobile py-space-2xl text-center gap-space-xs">
-        <h1 className="font-headline-lg text-headline-lg text-primary m-0">தமிழ் ஜாதகம்</h1>
+        <h1 className="font-headline-lg text-headline-lg text-primary m-0">
+          {language === 'ta' ? 'தமிழ் ஜோதிடம்' : 'Tamil Jothidam'}
+        </h1>
         <p className="font-body-md text-body-md text-on-surface-variant m-0">Tamil Vedic Astrology / Jathakam AI Platform</p>
         {user && <p className="font-body-sm text-body-sm text-outline m-0">{user.email}</p>}
 

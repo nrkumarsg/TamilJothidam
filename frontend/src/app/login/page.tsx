@@ -11,7 +11,7 @@ type Language = 'ta' | 'en';
 
 const labels = {
   ta: {
-    title: 'தமிழ் ஜாதகம்',
+    title: 'தமிழ் ஜோதிடம்',
     loginTab: 'உள்நுழைய',
     registerTab: 'புதிய கணக்கு',
     email: 'மின்னஞ்சல்',
@@ -28,7 +28,7 @@ const labels = {
     forgotPassword: 'கடவுச்சொல் மறந்துவிட்டதா?',
   },
   en: {
-    title: 'Tamil Jathakam',
+    title: 'Tamil Jothidam',
     loginTab: 'Log in',
     registerTab: 'Create account',
     email: 'Email',

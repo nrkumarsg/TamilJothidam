@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'தமிழ் ஜாதகம் | Tamil Jathakam',
+  title: 'தமிழ் ஜோதிடம் | Tamil Jothidam',
   description: 'Tamil Vedic Astrology / Jathakam AI platform',
 };
 
